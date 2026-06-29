@@ -6,6 +6,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 from fastapi import FastAPI  # noqa: E402
 from .routers import health  # noqa: E402
+
 app = FastAPI(
     title="AIEKP API",
     description="AI Engineering Knowledge Platform API",
@@ -13,6 +14,7 @@ app = FastAPI(
 )
 
 app.include_router(health.router)
+
 
 @app.get("/")
 async def root():
