@@ -1,0 +1,45 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install uv (Python Package Manager)
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      
+      - name: Install Dependencies (Monorepo)
+        run: uv sync --all-packages
+
+      - name: Lint Code with Ruff
+        # uvx runs the tool without needing to install it into the project
+        run: uvx ruff check .
+
+      - name: Check Formatting with Ruff
+        run: uvx ruff format --check .
+
+      - name: Type Checking with Mypy (Optional / Future)
+        # Bật lên khi dự án đã sẵn sàng check type khắt khe
+        # run: uvx mypy apps/ packages/
+        run: echo "Skipping mypy for now..."
+
+      - name: Run Unit Tests with Pytest
+        # Tạm thời comment lại cho đến khi chúng ta viết file test đầu tiên
+        # run: uv run pytest
+        run: echo "Skipping pytest for now..."
