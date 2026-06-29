@@ -1,0 +1,9 @@
+[project]
+name = "aiekp"
+version = "0.1.0"
+description = "AI Engineering Knowledge Platform"
+requires-python = ">=3.11"
+dependencies = []
+
+[tool.uv.workspace]
+members = ["apps/*", "packages/*"]
