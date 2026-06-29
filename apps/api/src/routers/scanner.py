@@ -24,6 +24,7 @@ class ScanResponse(BaseModel):
 @router.post("/scan", response_model=ScanResponse)
 async def scan_repository(request: ScanRequest) -> ScanResponse:
     import os
+
     repo_path = os.path.abspath(request.repo_path)
 
     db = PrismaClient()
