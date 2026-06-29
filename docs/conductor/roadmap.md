@@ -12,7 +12,7 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 ### Phase 0: Project Foundation
 *   **Summary**: Establish the monorepo structure, core interfaces, and base infrastructure (Docker Compose with Neo4j, Qdrant, Postgres, etc.). Ensure all foundational elements are in place before writing AI logic.
 *   **Detailed Spec**: `tracks/phase-0-foundation/spec.md`
-*   **Status**: Active 🟢
+*   **Status**: Completed ✅
 
 ---
 
@@ -20,7 +20,8 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 
 ### Phase 1: Repository Scanner
 *   **Summary**: Implement scanning mechanisms to traverse target repositories, detect files, and compute diffs for incremental updates.
-*   **Status**: Pending ⚪
+*   **Detailed Spec**: `tracks/phase-1-scanner/spec.md`
+*   **Status**: Active 🟢
 
 ### Phase 2: Parser
 *   **Summary**: Integrate Tree-sitter and language-specific parsers to transform raw source code into Abstract Syntax Trees (AST).

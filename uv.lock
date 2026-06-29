@@ -12,6 +12,7 @@ resolution-markers = [
 members = [
     "aiekp",
     "aiekp-api",
+    "aiekp-knowledge-engine",
     "aiekp-shared",
 ]
 
@@ -25,6 +26,7 @@ name = "aiekp-api"
 version = "0.1.0"
 source = { editable = "apps/api" }
 dependencies = [
+    { name = "aiekp-knowledge-engine" },
     { name = "aiekp-shared" },
     { name = "fastapi" },
     { name = "minio" },
@@ -38,6 +40,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiekp-knowledge-engine", editable = "packages/knowledge_engine" },
     { name = "aiekp-shared", editable = "packages/shared" },
     { name = "fastapi", specifier = ">=0.100.0" },
     { name = "minio", specifier = ">=7.2.0" },
@@ -48,6 +51,17 @@ requires-dist = [
     { name = "redis", specifier = ">=5.0.0" },
     { name = "uvicorn", specifier = ">=0.30.0" },
 ]
+
+[[package]]
+name = "aiekp-knowledge-engine"
+version = "0.1.0"
+source = { editable = "packages/knowledge_engine" }
+dependencies = [
+    { name = "aiekp-shared" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "aiekp-shared", editable = "packages/shared" }]
 
 [[package]]
 name = "aiekp-shared"

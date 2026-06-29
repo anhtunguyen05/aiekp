@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
 
@@ -58,3 +59,23 @@ class Evidence(BaseModel):
     type: str = Field(
         ..., description="Type of evidence (e.g., source_code, graph_path, adr)"
     )
+
+
+class FileChangeStatus(str, Enum):
+    """Represents the status of a file during scanning."""
+
+    ADDED = "ADDED"
+    MODIFIED = "MODIFIED"
+    DELETED = "DELETED"
+    UNCHANGED = "UNCHANGED"
+
+
+class FileScanEvent(BaseModel):
+    """Event yielded by the RepositoryScanner."""
+
+    repo_path: str = Field(..., description="Absolute path to the repository root")
+    file_path: str = Field(..., description="Relative path of the file from repo root")
+    file_hash: Optional[str] = Field(
+        None, description="SHA-256 hash of the file content"
+    )
+    status: FileChangeStatus = Field(..., description="Change status of the file")
