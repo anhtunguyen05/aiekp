@@ -1,0 +1,18 @@
+[project]
+name = "aiekp-knowledge-engine"
+version = "0.1.0"
+description = "Repository Scanner and Knowledge Engine for AIEKP"
+requires-python = ">=3.11"
+dependencies = [
+    "aiekp-shared"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+aiekp-shared = { workspace = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aiekp_knowledge_engine"]

@@ -12,6 +12,7 @@ dependencies = [
     "minio>=7.2.0",
     "prisma>=0.13.1",
     "aiekp-shared",
+    "aiekp-knowledge-engine",
     "python-dotenv>=1.2.2",
 ]
 
@@ -21,6 +22,7 @@ build-backend = "hatchling.build"
 
 [tool.uv.sources]
 aiekp-shared = { workspace = true }
+aiekp-knowledge-engine = { workspace = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
