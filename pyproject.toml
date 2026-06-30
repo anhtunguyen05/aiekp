@@ -6,4 +6,8 @@ requires-python = ">=3.11"
 dependencies = []
 
 [tool.uv.workspace]
-members = ["apps/*", "packages/*"]
+members = [
+    "apps/*",
+    "packages/*",
+    "plugins/python_parser",
+]

@@ -21,11 +21,12 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 ### Phase 1: Repository Scanner
 *   **Summary**: Implement scanning mechanisms to traverse target repositories, detect files, and compute diffs for incremental updates.
 *   **Detailed Spec**: `tracks/phase-1-scanner/spec.md`
-*   **Status**: Active 🟢
+*   **Status**: Completed ✅
 
 ### Phase 2: Parser
 *   **Summary**: Integrate Tree-sitter and language-specific parsers to transform raw source code into Abstract Syntax Trees (AST).
-*   **Status**: Pending ⚪
+*   **Detailed Spec**: `tracks/phase-2-parser/spec.md`
+*   **Status**: Active 🟢
 
 ### Phase 3: Metadata Extraction
 *   **Summary**: Process ASTs to extract higher-level structural data (classes, methods, imports) and business context metadata.
