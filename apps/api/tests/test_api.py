@@ -4,10 +4,12 @@ import pytest
 
 client = TestClient(app)
 
+
 def test_root():
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"message": "Welcome to AIEKP API"}
+
 
 def test_search_endpoint():
     # Because lifespan runs async, TestClient with lifespan can be tricky in older versions,
@@ -17,7 +19,7 @@ def test_search_endpoint():
         # 1. Invalid payload
         response = client.post("/search/", json={})
         assert response.status_code == 422
-        
+
         # 2. Valid payload (might fail if Neo4j/Qdrant are not up, but let's see)
         try:
             response = client.post("/search/", json={"query": "test", "top_k": 2})
@@ -27,6 +29,7 @@ def test_search_endpoint():
             assert data["query"] == "test"
         except Exception as e:
             pytest.skip(f"Skipping search test, DB likely not running: {e}")
+
 
 def test_ingest_endpoint():
     with TestClient(app) as client:

@@ -9,13 +9,16 @@ from python_parser.parser import PythonParser
 from metadata_extractor.factory import ExtractorFactory
 import python_extractor as python_ext
 
+
 def test_ingest():
     print("Initializing Managers...")
     neo4j = Neo4jGraphManager("bolt://localhost:7687", "neo4j", "aiekp_password")
     qdrant = QdrantVectorManager(host="localhost", port=6333)
     embedder = MockEmbedder()
-    
-    ingestor = GraphIngestor(neo4j_manager=neo4j, qdrant_manager=qdrant, embedder=embedder)
+
+    ingestor = GraphIngestor(
+        neo4j_manager=neo4j, qdrant_manager=qdrant, embedder=embedder
+    )
 
     parser_factory = ParserFactory()
     parser_factory.register_parser(PythonParser())
@@ -24,7 +27,7 @@ def test_ingest():
     extractor_factory.register_extractor("python", python_ext.PythonExtractor())
 
     repo_path = r"D:\AIEKP\plugins\python_parser"
-    
+
     for root, _, files in os.walk(repo_path):
         if ".git" in root or ".venv" in root or "__pycache__" in root:
             continue
@@ -45,7 +48,9 @@ def test_ingest():
                 except Exception as e:
                     print(f"Error processing {file_path}: {e}")
                     import traceback
+
                     traceback.print_exc()
+
 
 if __name__ == "__main__":
     test_ingest()

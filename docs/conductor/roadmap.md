@@ -39,8 +39,8 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 
 ### Phase 5: Knowledge Engine API
 *   **Summary**: Wrap Phases 1-4 into a cohesive, decoupled service with a clean interface for querying and updating the Knowledge Graph.
-*   **Status**: Pending ⚪
-
+*   **Detailed Spec**: `tracks/phase-5-api/spec.md`
+*   **Status**: Completed ✅
 ---
 
 ## AI Engines

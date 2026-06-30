@@ -27,7 +27,7 @@ async def init_dependencies() -> None:
     )
 
     from knowledge_graph import MockEmbedder
-    
+
     # Use MockEmbedder for local development to avoid heavy PyTorch dependencies
     # unless specified otherwise in production config.
     try:

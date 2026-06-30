@@ -3,7 +3,7 @@ import urllib.request
 import json
 
 node_id = r"D:\AIEKP\plugins\python_parser\tests\test_parser.py::test_python_parser"
-encoded_id = urllib.parse.quote(node_id, safe='')
+encoded_id = urllib.parse.quote(node_id, safe="")
 url = f"http://localhost:8000/graph/nodes/{encoded_id}"
 print(f"Requesting: {url}")
 try:
