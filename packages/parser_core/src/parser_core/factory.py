@@ -1,6 +1,6 @@
 import importlib
 import logging
-from typing import Dict, Type
+from typing import Dict
 
 from .interfaces import LanguageParser
 

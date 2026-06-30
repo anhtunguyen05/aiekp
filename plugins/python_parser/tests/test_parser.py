@@ -1,4 +1,3 @@
-import pytest
 from python_parser.parser import PythonParser
 
 def test_python_parser():

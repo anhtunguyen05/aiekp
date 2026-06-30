@@ -1,4 +1,3 @@
-import json
 from parser_core.factory import ParserFactory
 from python_parser.parser import PythonParser
 from parser_core.models import AiekpAstNode
