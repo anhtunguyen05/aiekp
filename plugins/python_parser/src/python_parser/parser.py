@@ -4,10 +4,12 @@ from typing import List
 
 from parser_core import LanguageParser, AiekpAstNode
 
+
 class PythonParser(LanguageParser):
     """
     Python-specific implementation of the LanguageParser using tree-sitter-python.
     """
+
     def __init__(self):
         self.language = Language(tspython.language())
         self.parser = Parser(self.language)
@@ -27,10 +29,10 @@ class PythonParser(LanguageParser):
         """
         Recursively maps a tree-sitter node to an AiekpAstNode.
         """
-        text = source[node.start_byte:node.end_byte].decode('utf-8', errors='replace')
-        
+        text = source[node.start_byte : node.end_byte].decode("utf-8", errors="replace")
+
         children = [self._map_node(child, source) for child in node.children]
-        
+
         return AiekpAstNode(
             type=node.type,
             text=text,
@@ -39,5 +41,5 @@ class PythonParser(LanguageParser):
             start_point=node.start_point,
             end_point=node.end_point,
             children=children,
-            properties={}
+            properties={},
         )
