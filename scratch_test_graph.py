@@ -1,9 +1,8 @@
-import os
 from parser_core.factory import ParserFactory
 from python_parser.parser import PythonParser
 from metadata_extractor.factory import ExtractorFactory
 import python_extractor as python_ext
-from knowledge_graph import Neo4jGraphManager, QdrantVectorManager, LocalSentenceTransformerEmbedder, GraphIngestor
+from knowledge_graph import Neo4jGraphManager, QdrantVectorManager, GraphIngestor
 
 def main():
     # 1. Setup Parser (Phase 2)
