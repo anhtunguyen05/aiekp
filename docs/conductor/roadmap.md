@@ -26,11 +26,12 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 ### Phase 2: Parser
 *   **Summary**: Integrate Tree-sitter and language-specific parsers to transform raw source code into Abstract Syntax Trees (AST).
 *   **Detailed Spec**: `tracks/phase-2-parser/spec.md`
-*   **Status**: Active 🟢
+*   **Status**: Completed ✅
 
 ### Phase 3: Metadata Extraction
 *   **Summary**: Process ASTs to extract higher-level structural data (classes, methods, imports) and business context metadata.
-*   **Status**: Pending ⚪
+*   **Detailed Spec**: `tracks/phase-3-extractor/spec.md`
+*   **Status**: Completed ✅
 
 ### Phase 4: Knowledge Graph Construction
 *   **Summary**: Push parsed nodes and relationships into the graph database (Neo4j) and vector embeddings (Qdrant) to form the Engineering Memory.

@@ -10,4 +10,5 @@ members = [
     "apps/*",
     "packages/*",
     "plugins/python_parser",
+    "plugins/python_extractor",
 ]

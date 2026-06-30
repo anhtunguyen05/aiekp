@@ -14,7 +14,9 @@ members = [
     "aiekp-api",
     "aiekp-knowledge-engine",
     "aiekp-shared",
+    "metadata-extractor",
     "parser-core",
+    "python-extractor",
     "python-parser",
 ]
 
@@ -504,6 +506,25 @@ wheels = [
 ]
 
 [[package]]
+name = "metadata-extractor"
+version = "0.1.0"
+source = { editable = "packages/metadata_extractor" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.13.4" }]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=9.1.1" }]
+
+[[package]]
 name = "minio"
 version = "7.2.20"
 source = { registry = "https://pypi.org/simple" }
@@ -950,6 +971,29 @@ sdist = { url = "https://files.pythonhosted.org/packages/82/ed/0301aeeac3e5353ef
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0b/d7/1959b9648791274998a9c3526f6d0ec8fd2233e4d4acce81bbae76b44b2a/python_dotenv-1.2.2-py3-none-any.whl", hash = "sha256:1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a", size = 22101, upload-time = "2026-03-01T16:00:25.09Z" },
 ]
+
+[[package]]
+name = "python-extractor"
+version = "0.1.0"
+source = { editable = "plugins/python_extractor" }
+dependencies = [
+    { name = "metadata-extractor" },
+    { name = "parser-core" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "metadata-extractor", editable = "packages/metadata_extractor" },
+    { name = "parser-core", editable = "packages/parser_core" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=9.1.1" }]
 
 [[package]]
 name = "python-parser"
