@@ -47,3 +47,18 @@ class QdrantVectorManager:
             points.append(PointStruct(id=point_id, vector=vector, payload=payload))
 
         self.client.upsert(collection_name=collection_name, points=points)
+
+    def search(
+        self,
+        collection_name: str,
+        query_vector: List[float],
+        limit: int = 10,
+    ):
+        """
+        Search for nearest vectors in Qdrant.
+        """
+        return self.client.query_points(
+            collection_name=collection_name,
+            query=query_vector,
+            limit=limit,
+        ).points

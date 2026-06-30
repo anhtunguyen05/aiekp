@@ -11,9 +11,15 @@ dependencies = [
     "redis>=5.0.0",
     "minio>=7.2.0",
     "prisma>=0.13.1",
+    "python-dotenv>=1.2.2",
+    "pydantic-settings>=2.0.0",
     "aiekp-shared",
     "aiekp-knowledge-engine",
-    "python-dotenv>=1.2.2",
+    "parser-core",
+    "python-parser",
+    "metadata-extractor",
+    "python-extractor",
+    "knowledge-graph",
 ]
 
 [build-system]
@@ -23,6 +29,11 @@ build-backend = "hatchling.build"
 [tool.uv.sources]
 aiekp-shared = { workspace = true }
 aiekp-knowledge-engine = { workspace = true }
+parser-core = { workspace = true }
+python-parser = { workspace = true }
+metadata-extractor = { workspace = true }
+python-extractor = { workspace = true }
+knowledge-graph = { workspace = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
