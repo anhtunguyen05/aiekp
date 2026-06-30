@@ -1,0 +1,26 @@
+[project]
+name = "python-parser"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "tudeptrai", email = "anhtunguyen643@gmail.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "parser-core",
+    "tree-sitter>=0.25.2",
+    "tree-sitter-python>=0.25.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.10.6,<0.11.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+parser-core = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
