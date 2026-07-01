@@ -43,15 +43,17 @@ class ReasoningService(IReasoningService):
 
     async def stream_process_query(self, request: ReasoningRequest):
         import json
-        
+
         # Simple streaming orchestration (bypassing full graph for direct streaming MVP)
         target_types = ["class", "method", "function", "interface"]
         try:
-            payload = await self.orchestrator.context_fetcher.fetch_context(request.query, target_types)
+            payload = await self.orchestrator.context_fetcher.fetch_context(
+                request.query, target_types
+            )
         except Exception as e:
             yield f"Error fetching context: {str(e)}"
             return
-            
+
         context_str = json.dumps([payload], indent=2)
         prompt = f"""
         User Query: {request.query}
@@ -61,9 +63,9 @@ class ReasoningService(IReasoningService):
         
         Please provide a comprehensive answer based ONLY on the provided context.
         """
-        
+
         async for chunk in self.orchestrator.llm_generator.astream(
             prompt,
-            "You are a senior software architect AI. Answer questions using only the provided context."
+            "You are a senior software architect AI. Answer questions using only the provided context.",
         ):
             yield chunk
