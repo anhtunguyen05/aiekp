@@ -60,6 +60,7 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 
 ### Phase 8: Command Line Interface (CLI)
 *   **Summary**: Create a developer-friendly CLI for local interactions, repository scanning, and quick queries.
+*   **Detailed Spec**: `tracks/phase-8-cli/spec.md`
 *   **Status**: Pending ⚪
 
 ### Phase 9: REST/GraphQL API

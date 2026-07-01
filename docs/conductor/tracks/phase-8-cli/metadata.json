@@ -1,0 +1,7 @@
+{
+  "id": "phase-8-cli",
+  "name": "Command Line Interface (CLI)",
+  "status": "planned",
+  "priority": "high",
+  "tags": ["cli", "python", "typer"]
+}
