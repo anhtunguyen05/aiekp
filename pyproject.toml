@@ -12,3 +12,6 @@ members = [
     "plugins/python_parser",
     "plugins/python_extractor",
 ]
+exclude = [
+    "apps/vscode-extension"
+]

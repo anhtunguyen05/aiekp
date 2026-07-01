@@ -28,9 +28,11 @@ async def reason_stream(
     """
 
     async def sse_generator():
+        import json
         async for chunk in reasoning_service.stream_process_query(request):
             # Format as SSE
-            yield f"data: {chunk}\n\n"
+            payload = json.dumps({"content": chunk})
+            yield f"data: {payload}\n\n"
         yield "data: [DONE]\n\n"
 
     return StreamingResponse(sse_generator(), media_type="text/event-stream")
