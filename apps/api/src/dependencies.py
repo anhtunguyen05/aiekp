@@ -9,6 +9,10 @@ from context_engine.ports.inbound import IContextService
 from context_engine.adapters.keyword_intent import KeywordIntentAdapter
 from context_engine.adapters.http_knowledge_client import HttpKnowledgeEngineAdapter
 from context_engine.services.context_service import ContextService
+from reasoning_engine.ports.inbound import IReasoningService
+from reasoning_engine.adapters.context_fetcher import ContextEngineHttpAdapter
+from reasoning_engine.adapters.llm_generator import LangChainLLMAdapter
+from reasoning_engine.services.reasoning_service import ReasoningService
 from src.config import settings
 
 # Global instances that will be managed by lifespan
@@ -85,4 +89,15 @@ def get_context_service() -> IContextService:
     knowledge_client = HttpKnowledgeEngineAdapter(base_url="http://localhost:8000")
     return ContextService(
         intent_analyzer=intent_adapter, knowledge_client=knowledge_client
+    )
+
+
+# --- Reasoning Engine Dependencies ---
+
+
+def get_reasoning_service() -> IReasoningService:
+    context_fetcher = ContextEngineHttpAdapter(base_url="http://localhost:8000")
+    llm_generator = LangChainLLMAdapter(model_name="gpt-4o-mini", temperature=0.0)
+    return ReasoningService(
+        context_fetcher=context_fetcher, llm_generator=llm_generator
     )
