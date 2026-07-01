@@ -5,9 +5,13 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
-from fastapi import FastAPI  # noqa: E402
-from src.dependencies import init_dependencies, close_dependencies  # noqa: E402
+from fastapi import FastAPI, Depends  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from strawberry.fastapi import GraphQLRouter  # noqa: E402
+from src.dependencies import init_dependencies, close_dependencies, verify_api_key  # noqa: E402
 from src.routers import health, scanner, ingest, search, graph, context, reason  # noqa: E402
+from src.config import settings  # noqa: E402
+from src.graphql.schema import schema  # noqa: E402
 
 
 @asynccontextmanager
@@ -26,13 +30,28 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(health.router)
-app.include_router(scanner.router)
-app.include_router(ingest.router)
-app.include_router(search.router)
-app.include_router(graph.router)
-app.include_router(context.router)
-app.include_router(reason.router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(health.router)  # Healthcheck doesn't need API Key
+
+# Protected routers
+protected_dependencies = [Depends(verify_api_key)]
+app.include_router(scanner.router, dependencies=protected_dependencies)
+app.include_router(ingest.router, dependencies=protected_dependencies)
+app.include_router(search.router, dependencies=protected_dependencies)
+app.include_router(graph.router, dependencies=protected_dependencies)
+app.include_router(context.router, dependencies=protected_dependencies)
+app.include_router(reason.router, dependencies=protected_dependencies)
+
+
+graphql_app = GraphQLRouter(schema)
+app.include_router(graphql_app, prefix="/graphql", dependencies=protected_dependencies)
 
 
 @app.get("/")

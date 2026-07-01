@@ -14,6 +14,23 @@ from reasoning_engine.adapters.context_fetcher import ContextEngineHttpAdapter
 from reasoning_engine.adapters.llm_generator import LangChainLLMAdapter
 from reasoning_engine.services.reasoning_service import ReasoningService
 from src.config import settings
+from fastapi import Security, HTTPException, status
+from fastapi.security import APIKeyHeader
+
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+
+def verify_api_key(api_key: str = Security(api_key_header)) -> str | None:
+    """Verify API Key if it is configured in settings."""
+    if not settings.api_key:
+        return None  # Authentication is disabled
+    if api_key == settings.api_key:
+        return api_key
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or missing API Key",
+    )
+
 
 # Global instances that will be managed by lifespan
 _neo4j_manager: Neo4jGraphManager | None = None

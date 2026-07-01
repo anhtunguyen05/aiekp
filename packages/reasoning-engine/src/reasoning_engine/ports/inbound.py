@@ -14,3 +14,11 @@ class IReasoningService(ABC):
         and returns the final ReasoningResult.
         """
         pass
+
+    @abstractmethod
+    async def stream_process_query(self, request: ReasoningRequest):
+        """
+        Takes a raw query, orchestrates context fetching and streams the synthesized answer.
+        Yields chunks of text.
+        """
+        pass
