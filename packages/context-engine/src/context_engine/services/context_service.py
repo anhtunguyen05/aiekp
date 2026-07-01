@@ -1,4 +1,4 @@
-from context_engine.domain.models import EvidencePayload, EvidenceNode
+from context_engine.domain.models import EvidencePayload
 from context_engine.ports.inbound import IContextService
 from context_engine.ports.outbound import IIntentAnalyzer, IKnowledgeEngineClient
 

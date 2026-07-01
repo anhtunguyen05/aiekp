@@ -5,6 +5,10 @@ from knowledge_graph import (
     GraphIngestor,
     Embedder,
 )
+from context_engine.ports.inbound import IContextService
+from context_engine.adapters.keyword_intent import KeywordIntentAdapter
+from context_engine.adapters.http_knowledge_client import HttpKnowledgeEngineAdapter
+from context_engine.services.context_service import ContextService
 from src.config import settings
 
 # Global instances that will be managed by lifespan
@@ -73,10 +77,6 @@ def get_ingestor() -> GraphIngestor:
     return _ingestor
 
 # --- Context Engine Dependencies ---
-from context_engine.ports.inbound import IContextService
-from context_engine.adapters.keyword_intent import KeywordIntentAdapter
-from context_engine.adapters.http_knowledge_client import HttpKnowledgeEngineAdapter
-from context_engine.services.context_service import ContextService
 
 def get_context_service() -> IContextService:
     intent_adapter = KeywordIntentAdapter()
