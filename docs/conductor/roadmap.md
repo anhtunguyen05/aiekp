@@ -52,6 +52,7 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 
 ### Phase 7: Reasoning Engine
 *   **Summary**: Orchestrate AI reasoning using LangGraph. This engine consumes the context payload (evidence) and generates final answers without blindly reading raw source code.
+*   **Detailed Spec**: `tracks/phase-7-reasoning-engine/spec.md`
 *   **Status**: Completed ✅
 
 ---
@@ -61,10 +62,11 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 ### Phase 8: Command Line Interface (CLI)
 *   **Summary**: Create a developer-friendly CLI for local interactions, repository scanning, and quick queries.
 *   **Detailed Spec**: `tracks/phase-8-cli/spec.md`
-*   **Status**: Pending ⚪
+*   **Status**: Completed ✅
 
 ### Phase 9: REST/GraphQL API
 *   **Summary**: Expose platform capabilities via robust APIs for external integrations and dashboard consumption.
+*   **Detailed Spec**: `tracks/phase-9-api/spec.md`
 *   **Status**: Pending ⚪
 
 ### Phase 10: VSCode Extension
