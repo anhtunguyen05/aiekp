@@ -29,6 +29,7 @@ async def reason_stream(
 
     async def sse_generator():
         import json
+
         async for chunk in reasoning_service.stream_process_query(request):
             # Format as SSE
             payload = json.dumps({"content": chunk})
