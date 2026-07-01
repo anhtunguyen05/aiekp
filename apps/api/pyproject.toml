@@ -21,6 +21,7 @@ dependencies = [
     "python-extractor",
     "knowledge-graph",
     "context-engine",
+    "reasoning-engine",
 ]
 
 [build-system]
@@ -36,6 +37,7 @@ metadata-extractor = { workspace = true }
 python-extractor = { workspace = true }
 knowledge-graph = { workspace = true }
 context-engine = { workspace = true }
+reasoning-engine = { workspace = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]

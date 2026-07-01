@@ -7,7 +7,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 from fastapi import FastAPI  # noqa: E402
 from src.dependencies import init_dependencies, close_dependencies  # noqa: E402
-from src.routers import health, scanner, ingest, search, graph, context  # noqa: E402
+from src.routers import health, scanner, ingest, search, graph, context, reason  # noqa: E402
 
 
 @asynccontextmanager
@@ -32,6 +32,7 @@ app.include_router(ingest.router)
 app.include_router(search.router)
 app.include_router(graph.router)
 app.include_router(context.router)
+app.include_router(reason.router)
 
 
 @app.get("/")
