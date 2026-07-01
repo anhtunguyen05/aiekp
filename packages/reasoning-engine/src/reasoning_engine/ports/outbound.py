@@ -28,3 +28,10 @@ class ILLMGenerator(ABC):
         Sends the prompt and optional system message to the LLM and returns the completion.
         """
         pass
+
+    @abstractmethod
+    async def astream(self, prompt: str, system_message: str = None):
+        """
+        Sends the prompt and streams the completion back using an async generator.
+        """
+        pass

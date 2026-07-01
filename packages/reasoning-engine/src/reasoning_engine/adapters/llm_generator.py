@@ -26,3 +26,15 @@ class LangChainLLMAdapter(ILLMGenerator):
                 [c.get("text", "") if isinstance(c, dict) else str(c) for c in content]
             )
         return str(content)
+
+    async def astream(self, prompt: str, system_message: str = None):
+        messages = []
+        if system_message:
+            messages.append(SystemMessage(content=system_message))
+        messages.append(HumanMessage(content=prompt))
+
+        async for chunk in self.llm.astream(messages):
+            if isinstance(chunk.content, list):
+                yield " ".join([c.get("text", "") if isinstance(c, dict) else str(c) for c in chunk.content])
+            else:
+                yield str(chunk.content)

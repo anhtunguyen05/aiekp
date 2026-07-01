@@ -5,6 +5,8 @@ class Settings(BaseSettings):
     # API Settings
     api_host: str = "0.0.0.0"
     api_port: int = 8000
+    api_key: str | None = None
+    cors_origins: list[str] = ["*"]
 
     # Neo4j Settings
     neo4j_uri: str = "bolt://localhost:7687"
