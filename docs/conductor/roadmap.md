@@ -52,7 +52,7 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 
 ### Phase 7: Reasoning Engine
 *   **Summary**: Orchestrate AI reasoning using LangGraph. This engine consumes the context payload (evidence) and generates final answers without blindly reading raw source code.
-*   **Status**: Pending ⚪
+*   **Status**: Completed ✅
 
 ---
 
@@ -69,3 +69,31 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 ### Phase 10: VSCode Extension
 *   **Summary**: Deliver the ultimate user experience by integrating the Context and Reasoning engines directly into the IDE, providing real-time architectural insights.
 *   **Status**: Pending ⚪
+
+---
+
+## Future Expansions (Post-MVP)
+
+### Phase 11: Web Dashboard (UI/UX)
+*   **Summary**: A frontend platform (e.g., Next.js/React) to visually explore the knowledge graph, view architectural node/edge graphs, and configure system settings.
+*   **Status**: Planned 🔮
+
+### Phase 12: CI/CD & GitHub/GitLab Integration
+*   **Summary**: Integrate the engine into DevOps pipelines. Automatically scan code, run reasoning on PRs, and provide AI-driven architectural reviews on new commits.
+*   **Status**: Planned 🔮
+
+### Phase 13: Multi-Agent Swarm
+*   **Summary**: Upgrade from a single Reasoning Agent to a swarm of specialized agents (Architect, QA, Security) that collaborate over the shared Knowledge Graph.
+*   **Status**: Planned 🔮
+
+### Phase 14: Autonomous Code Generation & Execution
+*   **Summary**: Evolve the platform from "read and reason" to "write and execute", allowing the AI to generate PRs, fix technical debt, and implement features autonomously.
+*   **Status**: Planned 🔮
+
+### Phase 15: Evaluation & RAG Fine-Tuning
+*   **Summary**: Implement telemetry (e.g., Ragas, TruLens) to measure answer accuracy. Use user feedback logs to fine-tune the Vector Database, prompts, and underlying LLMs.
+*   **Status**: Planned 🔮
+
+### Phase 16: Security, Auth & Multi-Tenancy (RBAC)
+*   **Summary**: Implement access control (OAuth2, JWT) and Node-level RBAC for multi-team environments to ensure code privacy and secure multi-tenant deployments.
+*   **Status**: Planned 🔮
