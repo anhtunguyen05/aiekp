@@ -2,10 +2,12 @@ from abc import ABC, abstractmethod
 from typing import List
 from context_engine.domain.models import RetrievalIntent, EvidenceNode
 
+
 class IIntentAnalyzer(ABC):
     @abstractmethod
     async def analyze(self, query: str) -> RetrievalIntent:
         pass
+
 
 class IKnowledgeEngineClient(ABC):
     @abstractmethod

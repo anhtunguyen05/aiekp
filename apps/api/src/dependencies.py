@@ -76,9 +76,13 @@ def get_ingestor() -> GraphIngestor:
         raise RuntimeError("Ingestor not initialized")
     return _ingestor
 
+
 # --- Context Engine Dependencies ---
+
 
 def get_context_service() -> IContextService:
     intent_adapter = KeywordIntentAdapter()
     knowledge_client = HttpKnowledgeEngineAdapter(base_url="http://localhost:8000")
-    return ContextService(intent_analyzer=intent_adapter, knowledge_client=knowledge_client)
+    return ContextService(
+        intent_analyzer=intent_adapter, knowledge_client=knowledge_client
+    )

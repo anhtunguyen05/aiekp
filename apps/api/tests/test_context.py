@@ -3,6 +3,7 @@ from src.main import app
 
 client = TestClient(app)
 
+
 def test_context_retrieve():
     # 1. Valid payload
     response = client.post("/context/retrieve", json={"query": "find user class"})
