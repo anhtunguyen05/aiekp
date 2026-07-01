@@ -7,7 +7,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 from fastapi import FastAPI  # noqa: E402
 from src.dependencies import init_dependencies, close_dependencies  # noqa: E402
-from src.routers import health, scanner, ingest, search, graph  # noqa: E402
+from src.routers import health, scanner, ingest, search, graph, context  # noqa: E402
 
 
 @asynccontextmanager
@@ -20,9 +20,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="AIEKP API",
-    description="AI Engineering Knowledge Platform API",
-    version="0.1.0",
+    title="AIEKP Knowledge Engine API",
+    description="API for managing and querying the AI Engineering Knowledge Platform",
+    version="1.0.0",
     lifespan=lifespan,
 )
 
@@ -31,6 +31,7 @@ app.include_router(scanner.router)
 app.include_router(ingest.router)
 app.include_router(search.router)
 app.include_router(graph.router)
+app.include_router(context.router)
 
 
 @app.get("/")

@@ -47,7 +47,8 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 
 ### Phase 6: Context Intelligence Engine
 *   **Summary**: Build the retrieval and intent detection layer. This engine determines *what* evidence is needed for a query and fetches it from the Knowledge Engine.
-*   **Status**: Pending ⚪
+*   **Detailed Spec**: `tracks/phase-6-context-engine/spec.md`
+*   **Status**: Completed ✅
 
 ### Phase 7: Reasoning Engine
 *   **Summary**: Orchestrate AI reasoning using LangGraph. This engine consumes the context payload (evidence) and generates final answers without blindly reading raw source code.
