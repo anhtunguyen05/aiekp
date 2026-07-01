@@ -4,8 +4,6 @@ import httpx
 from rich.console import Console
 from rich.table import Table
 from rich.markdown import Markdown
-from typing import Optional
-
 from aiekp_cli.config import API_URL
 
 app = typer.Typer(
@@ -16,7 +14,7 @@ console = Console()
 @app.command()
 def status():
     """Check the status of the AIEKP API and infrastructure."""
-    with console.status("[bold green]Checking API status...") as status:
+    with console.status("[bold green]Checking API status..."):
         try:
             response = httpx.get(f"{API_URL}/health/", timeout=5.0)
             response.raise_for_status()
@@ -53,7 +51,7 @@ def ingest(path: str = typer.Argument(..., help="Path to the directory to ingest
         console.print(f"[bold red]Error:[/bold red] Path does not exist: {abs_path}")
         raise typer.Exit(1)
         
-    with console.status(f"[bold blue]Ingesting {abs_path}...") as status:
+    with console.status(f"[bold blue]Ingesting {abs_path}..."):
         try:
             response = httpx.post(f"{API_URL}/ingest/", json={"repo_path": abs_path}, timeout=120.0)
             response.raise_for_status()
@@ -85,7 +83,7 @@ def ingest(path: str = typer.Argument(..., help="Path to the directory to ingest
 @app.command()
 def context(query: str = typer.Argument(..., help="Query to retrieve context for")):
     """Fetch relevant architectural and code context from the Knowledge Graph."""
-    with console.status(f"[bold blue]Retrieving context for:[/bold blue] '{query}'...") as status:
+    with console.status(f"[bold blue]Retrieving context for:[/bold blue] '{query}'..."):
         try:
             response = httpx.post(f"{API_URL}/context/retrieve", json={"query": query}, timeout=30.0)
             response.raise_for_status()
@@ -117,7 +115,7 @@ def context(query: str = typer.Argument(..., help="Query to retrieve context for
 @app.command()
 def reason(query: str = typer.Argument(..., help="Question or task for the reasoning engine")):
     """End-to-end question answering and code reasoning."""
-    with console.status(f"[bold magenta]Thinking about:[/bold magenta] '{query}'...") as status:
+    with console.status(f"[bold magenta]Thinking about:[/bold magenta] '{query}'..."):
         try:
             import uuid
             session_id = str(uuid.uuid4())
