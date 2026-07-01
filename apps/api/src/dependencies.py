@@ -97,7 +97,7 @@ def get_context_service() -> IContextService:
 
 def get_reasoning_service() -> IReasoningService:
     context_fetcher = ContextEngineHttpAdapter(base_url="http://localhost:8000")
-    llm_generator = LangChainLLMAdapter(model_name="gpt-4o-mini", temperature=0.0)
+    llm_generator = LangChainLLMAdapter(model_name="gemini-3.5-flash", temperature=0.0)
     return ReasoningService(
         context_fetcher=context_fetcher, llm_generator=llm_generator
     )
