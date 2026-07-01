@@ -67,11 +67,17 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 ### Phase 9: REST/GraphQL API
 *   **Summary**: Expose platform capabilities via robust APIs for external integrations and dashboard consumption.
 *   **Detailed Spec**: `tracks/phase-9-api/spec.md`
-*   **Status**: Pending ⚪
+*   **Status**: Completed ✅
 
 ### Phase 10: VSCode Extension
 *   **Summary**: Deliver the ultimate user experience by integrating the Context and Reasoning engines directly into the IDE, providing real-time architectural insights.
-*   **Status**: Pending ⚪
+*   **Detailed Spec**: `tracks/phase-10-extension/spec.md`
+*   **Status**: In Progress ⏳
+
+### Phase 10.5: MVP Polish, QA & Packaging
+*   **Summary**: End-to-end testing, bug fixing, improving AI accuracy, and packaging the CLI and VSCode extension for public release.
+*   **Detailed Spec**: `tracks/phase-10.5-release/spec.md`
+*   **Status**: Planned 🔮
 
 ---
 
