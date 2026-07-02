@@ -549,27 +549,20 @@ Every recommendation should contain evidence.
 
 ---
 
-# 14. Future Direction
+# 14. Future Direction (The "Killer Features")
 
-The project should evolve into an Engineering Intelligence Platform.
+To truly differentiate from stateless AI assistants (like Copilot/Claude), the project must evolve into an **Engineering Intelligence Platform** by developing capabilities that LLMs alone cannot achieve:
 
-Future capabilities
+1. **System-wide Impact Analysis:**
+   - Traversing the Knowledge Graph to instantly answer: "If I modify this DB schema, which frontend components break?" across a million-line monorepo.
+2. **Automated Architecture Governance (Rule Engine):**
+   - Continuously auditing the Graph against company-specific architectural rules (e.g., "Controllers cannot import Repositories") and catching violations during CI/CD.
+3. **Automated Onboarding Generation:**
+   - Generating up-to-date, highly contextual onboarding manuals based on the current state of the Knowledge Graph for specific domains/features (e.g., "Explain the Payment flow to a new Junior Dev").
+4. **CI/CD Autonomous Reviewer:**
+   - Acting as a tireless Senior Architect that automatically reviews every Pull Request against the company's Engineering Memory, checking for security, compliance, and architectural drift.
 
-Enterprise Knowledge
-
-Architecture Governance
-
-Engineering Memory
-
-Decision Intelligence
-
-Software Digital Twin
-
-Continuous Repository Learning
-
-Organization Knowledge
-
-Eventually the platform should become an AI operating system for software engineering rather than a repository analysis tool.
+Eventually, the platform should become an AI operating system for software engineering rather than just a repository analysis tool.
 
 ---
 

@@ -1,0 +1,26 @@
+[project]
+name = "typescript-extractor"
+version = "0.1.0"
+description = "Typescript/Javascript Extractor Plugin for AIEKP"
+readme = "README.md"
+authors = [
+    { name = "AIEKP Team" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "metadata-extractor",
+    "parser-core",
+]
+
+[build-system]
+requires = ["uv_build>=0.10.6,<0.11.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+parser-core = { workspace = true }
+metadata-extractor = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

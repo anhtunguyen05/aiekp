@@ -18,7 +18,7 @@ class ExtractorFactory:
 
     def _load_default_plugins(self):
         """Attempts to load known extractor plugins dynamically."""
-        known_plugins = ["python_extractor"]
+        known_plugins = ["python_extractor", "typescript_extractor"]
         for plugin in known_plugins:
             try:
                 module = importlib.import_module(plugin)

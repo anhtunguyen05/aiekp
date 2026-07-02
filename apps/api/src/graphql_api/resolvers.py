@@ -1,5 +1,5 @@
 from typing import List, Optional
-from src.graphql.types import EntityNode, RelationshipEdge, Property
+from src.graphql_api.types import EntityNode, RelationshipEdge, Property
 from src.dependencies import get_neo4j_manager
 
 
