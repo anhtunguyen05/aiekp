@@ -55,7 +55,9 @@ class ReasoningService(IReasoningService):
 
         try:
             yield "Initializing Multi-Agent Swarm...\\n"
-            async for output in self.orchestrator.graph.astream(initial_state, config=config):
+            async for output in self.orchestrator.graph.astream(
+                initial_state, config=config
+            ):
                 for node_name, state_update in output.items():
                     if node_name == "fetch_context":
                         yield "[System] Context fetched from Knowledge Graph.\\n"

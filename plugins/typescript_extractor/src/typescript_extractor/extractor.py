@@ -27,7 +27,11 @@ class TypescriptExtractor(LanguageExtractor):
     def _find_declarations(self, node: AiekpAstNode, classes: list, functions: list):
         if node.type == "class_declaration":
             classes.append(self._extract_class(node))
-        elif node.type in ["function_declaration", "arrow_function", "generator_function"]:
+        elif node.type in [
+            "function_declaration",
+            "arrow_function",
+            "generator_function",
+        ]:
             # Check if it's not part of a class
             functions.append(self._extract_function(node))
         else:
@@ -35,7 +39,11 @@ class TypescriptExtractor(LanguageExtractor):
                 self._find_declarations(child, classes, functions)
 
     def _extract_class(self, node: AiekpAstNode) -> ClassMetadata:
-        name = self._get_child_text(node, "type_identifier") or self._get_child_text(node, "identifier") or "Unknown"
+        name = (
+            self._get_child_text(node, "type_identifier")
+            or self._get_child_text(node, "identifier")
+            or "Unknown"
+        )
         docstring = self._extract_docstring_from_previous_sibling(node)
         methods = []
 
@@ -96,7 +104,9 @@ class TypescriptExtractor(LanguageExtractor):
         child = self._get_child(node, child_type)
         return child.text if child else None
 
-    def _extract_docstring_from_previous_sibling(self, node: AiekpAstNode) -> Optional[str]:
+    def _extract_docstring_from_previous_sibling(
+        self, node: AiekpAstNode
+    ) -> Optional[str]:
         # Currently, AiekpAstNode does not expose siblings directly.
         # TS docstrings (JSDoc) are usually 'comment' nodes before the declaration.
         # Since we don't have parent/sibling refs yet, this is difficult.

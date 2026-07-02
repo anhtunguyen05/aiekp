@@ -267,7 +267,9 @@ def context(query: str = typer.Argument(..., help="Query to retrieve context for
 @app.command()
 def reason(
     query: str = typer.Argument(..., help="Question or task for the reasoning engine"),
-    project_path: str = typer.Option(None, "--project-path", help="Optional project path to restrict context to"),
+    project_path: str = typer.Option(
+        None, "--project-path", help="Optional project path to restrict context to"
+    ),
 ):
     """End-to-end question answering and code reasoning."""
     console.print(f"[bold magenta]Thinking about:[/bold magenta] '{query}'...\n")
@@ -278,12 +280,14 @@ def reason(
         session_id = str(uuid.uuid4())
         payload = {"query": query, "session_id": session_id}
         if project_path:
-            # We can add this to the request if the backend supports it, 
+            # We can add this to the request if the backend supports it,
             # for now we'll just include it in the query context.
             payload["query"] = f"[Project: {project_path}] {query}"
 
         # Connect to stream endpoint
-        with httpx.stream("POST", f"{API_URL}/reason/stream", json=payload, timeout=300.0) as response:
+        with httpx.stream(
+            "POST", f"{API_URL}/reason/stream", json=payload, timeout=300.0
+        ) as response:
             response.raise_for_status()
             for line in response.iter_lines():
                 if line.startswith("data: "):

@@ -15,7 +15,7 @@ class TypescriptParser(LanguageParser):
         self.ts_language = Language(tstypescript.language_typescript())
         self.tsx_language = Language(tstypescript.language_tsx())
         self.js_language = Language(tsjavascript.language())
-        
+
         self.ts_parser = Parser(self.ts_language)
         self.tsx_parser = Parser(self.tsx_language)
         self.js_parser = Parser(self.js_language)
@@ -35,7 +35,7 @@ class TypescriptParser(LanguageParser):
             tree = self.ts_parser.parse(source_bytes)
         else:
             tree = self.js_parser.parse(source_bytes)
-            
+
         return self._map_node(tree.root_node, source_bytes)
 
     def _map_node(self, node: Node, source: bytes) -> AiekpAstNode:
@@ -43,10 +43,12 @@ class TypescriptParser(LanguageParser):
         Recursively maps a tree-sitter Node to an AiekpAstNode.
         """
         try:
-            text = source[node.start_byte : node.end_byte].decode("utf-8", errors="replace")
+            text = source[node.start_byte : node.end_byte].decode(
+                "utf-8", errors="replace"
+            )
         except Exception:
             text = ""
-            
+
         children = [self._map_node(child, source) for child in node.children]
 
         return AiekpAstNode(
