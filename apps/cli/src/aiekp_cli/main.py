@@ -267,44 +267,49 @@ def context(query: str = typer.Argument(..., help="Query to retrieve context for
 @app.command()
 def reason(
     query: str = typer.Argument(..., help="Question or task for the reasoning engine"),
+    project_path: str = typer.Option(None, "--project-path", help="Optional project path to restrict context to"),
 ):
     """End-to-end question answering and code reasoning."""
-    with console.status(f"[bold magenta]Thinking about:[/bold magenta] '{query}'..."):
-        try:
-            import uuid
+    console.print(f"[bold magenta]Thinking about:[/bold magenta] '{query}'...\n")
+    try:
+        import uuid
+        import json
 
-            session_id = str(uuid.uuid4())
-            # Assuming the reasoning endpoint takes a request body with 'query' and 'session_id'
-            response = httpx.post(
-                f"{API_URL}/reason/",
-                json={"query": query, "session_id": session_id},
-                timeout=300.0,
-            )
+        session_id = str(uuid.uuid4())
+        payload = {"query": query, "session_id": session_id}
+        if project_path:
+            # We can add this to the request if the backend supports it, 
+            # for now we'll just include it in the query context.
+            payload["query"] = f"[Project: {project_path}] {query}"
+
+        # Connect to stream endpoint
+        with httpx.stream("POST", f"{API_URL}/reason/stream", json=payload, timeout=300.0) as response:
             response.raise_for_status()
-            data = response.json()
+            for line in response.iter_lines():
+                if line.startswith("data: "):
+                    data_str = line[6:]
+                    if data_str == "[DONE]":
+                        break
+                    try:
+                        chunk = json.loads(data_str)
+                        # Print the stream chunk directly without newline to simulate typing
+                        # We use console.print with end="" so it doesn't add newlines
+                        print(chunk.get("content", ""), end="", flush=True)
+                    except json.JSONDecodeError:
+                        pass
+        print("\n")
+        console.print("[bold green]Reasoning Complete![/bold green]")
 
-            answer = data.get("answer", "No answer provided.")
-
-            console.print("\n[bold green]Answer:[/bold green]")
-            console.print(Markdown(answer))
-
-            # Display sources if available
-            sources = data.get("sources_used", [])
-            if sources:
-                console.print("\n[bold cyan]Sources used:[/bold cyan]")
-                for source in sources:
-                    console.print(f"- {source}")
-
-        except httpx.ConnectError:
-            console.print(
-                f"[bold red]Error:[/bold red] Could not connect to API at {API_URL}."
-            )
-        except httpx.TimeoutException:
-            console.print(
-                "[bold red]Error:[/bold red] Reasoning engine timed out. This task might be too complex or the LLM is taking too long."
-            )
-        except httpx.HTTPStatusError as e:
-            console.print(f"[bold red]Reasoning failed:[/bold red] {e.response.text}")
+    except httpx.ConnectError:
+        console.print(
+            f"\n[bold red]Error:[/bold red] Could not connect to API at {API_URL}."
+        )
+    except httpx.TimeoutException:
+        console.print(
+            "\n[bold red]Error:[/bold red] Reasoning engine timed out. This task might be too complex or the LLM is taking too long."
+        )
+    except httpx.HTTPStatusError as e:
+        console.print(f"\n[bold red]Reasoning failed:[/bold red] {e.response.text}")
 
 
 if __name__ == "__main__":

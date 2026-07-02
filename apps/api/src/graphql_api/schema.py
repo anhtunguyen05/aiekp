@@ -1,7 +1,7 @@
 import strawberry
 from typing import List, Optional
-from src.graphql.types import EntityNode
-from src.graphql.resolvers import get_node_by_id, search_nodes
+from src.graphql_api.types import EntityNode
+from src.graphql_api.resolvers import get_node_by_id, search_nodes
 
 
 @strawberry.type

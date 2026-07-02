@@ -1,18 +1,18 @@
-from typing import TypedDict, List, Dict, Any, Optional
-from langgraph.graph import StateGraph, END
-from reasoning_engine.ports.outbound import IContextFetcher, ILLMGenerator
 import json
+from typing import TypedDict, List, Dict, Any, Optional, Literal
+from langgraph.graph import StateGraph, END
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
+from reasoning_engine.ports.outbound import IContextFetcher, ILLMGenerator
 
 
 class GraphState(TypedDict):
     query: str
     session_id: str
     context_accumulated: List[Dict[str, Any]]
-    is_context_sufficient: bool
-    iterations: int
-    final_answer: Optional[str]
     sources_used: List[str]
+    messages: List[BaseMessage]
     error: Optional[str]
+    next_agent: str
 
 
 class ReasoningOrchestrator:
@@ -25,44 +25,46 @@ class ReasoningOrchestrator:
         workflow = StateGraph(GraphState)
 
         workflow.add_node("fetch_context", self.fetch_context_node)
-        workflow.add_node("evaluate_context", self.evaluate_context_node)
-        workflow.add_node("synthesize", self.synthesize_node)
+        workflow.add_node("supervisor", self.supervisor_node)
+        workflow.add_node("architect", self.architect_node)
+        workflow.add_node("qa", self.qa_node)
+        workflow.add_node("security", self.security_node)
 
-        # Set entry point
+        # Entry point is always fetching context first
         workflow.set_entry_point("fetch_context")
 
-        workflow.add_edge("fetch_context", "evaluate_context")
+        workflow.add_edge("fetch_context", "supervisor")
 
-        # Conditional edge from evaluate_context
+        # Supervisor routes to agents or END
         workflow.add_conditional_edges(
-            "evaluate_context",
-            self.route_evaluation,
-            {"synthesize": "synthesize", "fetch_context": "fetch_context", "end": END},
+            "supervisor",
+            lambda state: state["next_agent"],
+            {
+                "architect": "architect",
+                "qa": "qa",
+                "security": "security",
+                "FINISH": END,
+            },
         )
 
-        workflow.add_edge("synthesize", END)
+        # Specialized agents always report back to the supervisor
+        workflow.add_edge("architect", "supervisor")
+        workflow.add_edge("qa", "supervisor")
+        workflow.add_edge("security", "supervisor")
 
-        # For MVP we don't compile with a checkpointer, but we will add Postgres checkpointer soon
-        # if the user requested it. Let's start with in-memory or no checkpointer to test the flow first.
         return workflow.compile()
 
     async def fetch_context_node(self, state: GraphState):
         """Fetches context from Context Intelligence Engine."""
-        # Simple backoff/expansion logic for iterations
-        target_types = ["class", "method", "function", "interface"]
-        if state["iterations"] > 0:
-            target_types = []  # broader search
-
         try:
+            # For simplicity, we just do one broad fetch at the start
             payload = await self.context_fetcher.fetch_context(
-                state["query"], target_types
+                state["query"], ["class", "method", "function", "interface"]
             )
-
-            # Append fetched nodes
-            new_context = state["context_accumulated"].copy()
+            
+            new_context = state.get("context_accumulated", [])
             new_context.append(payload)
 
-            # Extract sources
             sources = state.get("sources_used", [])
             for node in payload.get("nodes", []):
                 if node["id"] not in sources:
@@ -71,69 +73,98 @@ class ReasoningOrchestrator:
             return {
                 "context_accumulated": new_context,
                 "sources_used": sources,
-                "iterations": state["iterations"] + 1,
+                "error": None
             }
         except Exception as e:
             return {
                 "error": str(e),
-                "is_context_sufficient": True,
-            }  # Force end on error
-
-    async def evaluate_context_node(self, state: GraphState):
-        """Evaluates if the fetched context is sufficient to answer the query."""
-        if state.get("error"):
-            return {"is_context_sufficient": True}
-
-        if state["iterations"] >= 3:
-            # Max iterations reached, force synthesis
-            return {"is_context_sufficient": True}
-
-        # Format the context for the LLM
-        context_str = json.dumps(
-            [p.get("summary", "No summary") for p in state["context_accumulated"]]
-        )
-
-        prompt = f"""
-        User Query: {state["query"]}
-        
-        Current Context:
-        {context_str}
-        
-        Is the provided context sufficient to answer the query accurately? 
-        Answer with ONLY 'YES' or 'NO'.
-        """
-        response = await self.llm_generator.generate(
-            prompt, "You are a context evaluator."
-        )
-
-        is_sufficient = "yes" in response.lower()
-        return {"is_context_sufficient": is_sufficient}
-
-    def route_evaluation(self, state: GraphState):
-        if state.get("error"):
-            return "end"
-        if state["is_context_sufficient"]:
-            return "synthesize"
-        return "fetch_context"
-
-    async def synthesize_node(self, state: GraphState):
-        """Generates the final answer."""
-        if state.get("error"):
-            return {
-                "final_answer": f"Error occurred during reasoning: {state['error']}"
+                "next_agent": "FINISH"
             }
 
-        context_str = json.dumps(state["context_accumulated"], indent=2)
+    async def supervisor_node(self, state: GraphState):
+        """
+        The supervisor decides which agent to call next based on the query and conversation history,
+        or synthesize the final answer and call FINISH.
+        """
+        if state.get("error"):
+            return {"next_agent": "FINISH"}
+
+        # If no messages yet, this is the first supervisor pass. We should route to at least one expert.
+        # Alternatively, if there's enough history, it routes to FINISH.
+        history_str = "\\n".join([f"{type(m).__name__}: {m.content}" for m in state.get("messages", [])])
+        
         prompt = f"""
-        User Query: {state["query"]}
+        User Query: {state['query']}
+        
+        Conversation History:
+        {history_str}
+        
+        You are the Supervisor. Your job is to route this query to a specialized agent (architect, qa, security) to gather insights based on the retrieved code context.
+        If you have enough information to answer the query fully, output 'FINISH' and your final synthesized answer.
+        
+        Respond ONLY with a JSON object in this format:
+        {{"next_agent": "architect|qa|security|FINISH", "final_answer": "your answer if FINISH, else null"}}
+        """
+        response_str = await self.llm_generator.generate(prompt, "You are a JSON-only supervisor agent.")
+        
+        try:
+            import re
+            
+            # Remove markdown code blocks if they exist
+            cleaned_response = re.sub(r'```json\s*', '', response_str)
+            cleaned_response = re.sub(r'```\s*', '', cleaned_response)
+            
+            json_match = re.search(r'\{.*\}', cleaned_response, re.DOTALL)
+            if json_match:
+                response = json.loads(json_match.group(0))
+            else:
+                response = json.loads(cleaned_response)
+            
+            next_agent = response.get("next_agent", "FINISH")
+            final_answer = response.get("final_answer", "")
+            
+            if next_agent == "FINISH":
+                # Add the final answer to messages
+                new_msg = AIMessage(content=final_answer, name="Supervisor")
+                return {"next_agent": "FINISH", "messages": state.get("messages", []) + [new_msg]}
+            else:
+                return {"next_agent": next_agent}
+        except Exception as e:
+            # Fallback
+            new_msg = AIMessage(content=f"Error parsing supervisor output: {str(e)}\nRaw LLM output was:\n{response_str}", name="Supervisor")
+            return {"next_agent": "FINISH", "messages": state.get("messages", []) + [new_msg]}
+
+    async def _specialized_agent_node(self, state: GraphState, role_name: str, system_prompt: str):
+        context_str = json.dumps(state["context_accumulated"], indent=2)
+        history_str = "\\n".join([f"{type(m).__name__}: {m.content}" for m in state.get("messages", [])])
+        
+        prompt = f"""
+        User Query: {state['query']}
         
         Context Evidence:
         {context_str}
         
-        Please provide a comprehensive answer based ONLY on the provided context.
+        Previous Analysis:
+        {history_str}
+        
+        Please provide your analysis based ONLY on the provided context.
         """
-        answer = await self.llm_generator.generate(
-            prompt,
-            "You are a senior software architect AI. Answer questions using only the provided context.",
+        answer = await self.llm_generator.generate(prompt, system_prompt)
+        
+        new_msg = AIMessage(content=answer, name=role_name)
+        return {"messages": state.get("messages", []) + [new_msg]}
+
+    async def architect_node(self, state: GraphState):
+        return await self._specialized_agent_node(
+            state, "Architect", "You are a Software Architect AI. Focus on system design, SOLID principles, dependencies, and structural integrity."
         )
-        return {"final_answer": answer}
+
+    async def qa_node(self, state: GraphState):
+        return await self._specialized_agent_node(
+            state, "QA", "You are a QA Engineer AI. Focus on edge cases, testability, logic bugs, and potential failures."
+        )
+
+    async def security_node(self, state: GraphState):
+        return await self._specialized_agent_node(
+            state, "Security", "You are a Security Expert AI. Focus on identifying vulnerabilities (XSS, SQLi, insecure data, etc.)"
+        )

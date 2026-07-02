@@ -11,7 +11,7 @@ from strawberry.fastapi import GraphQLRouter  # noqa: E402
 from src.dependencies import init_dependencies, close_dependencies, verify_api_key  # noqa: E402
 from src.routers import health, scanner, ingest, search, graph, context, reason  # noqa: E402
 from src.config import settings  # noqa: E402
-from src.graphql.schema import schema  # noqa: E402
+from src.graphql_api.schema import schema  # noqa: E402
 
 
 @asynccontextmanager

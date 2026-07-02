@@ -19,10 +19,13 @@ dependencies = [
     "python-parser",
     "metadata-extractor",
     "python-extractor",
+    "typescript-parser",
+    "typescript-extractor",
     "knowledge-graph",
     "context-engine",
     "reasoning-engine",
-    "strawberry-graphql>=0.320.0",
+    "strawberry-graphql[fastapi]>=0.320.0",
+    "graphql-core<3.3.0",
 ]
 
 [build-system]
@@ -36,6 +39,8 @@ parser-core = { workspace = true }
 python-parser = { workspace = true }
 metadata-extractor = { workspace = true }
 python-extractor = { workspace = true }
+typescript-parser = { workspace = true }
+typescript-extractor = { workspace = true }
 knowledge-graph = { workspace = true }
 context-engine = { workspace = true }
 reasoning-engine = { workspace = true }
