@@ -55,17 +55,27 @@ class ReasoningService(IReasoningService):
             return
 
         context_str = json.dumps([payload], indent=2)
+        system_message = """You are AIEKP (AI Engineering Knowledge Platform), an elite Senior Software Architect AI.
+Your purpose is to answer the user's questions strictly based on the provided Knowledge Graph context.
+Rules:
+1. DO NOT hallucinate or guess. If the provided context does not contain enough information to answer the question, explicitly state: "Based on the available context, I cannot fully answer this question."
+2. Use GitHub Flavored Markdown for formatting. Format code blocks with appropriate syntax highlighting.
+3. Keep your answers concise, direct, and focused on architectural or code-level insights.
+4. When referencing a file or a class, try to use its exact name from the context.
+"""
+
         prompt = f"""
-        User Query: {request.query}
-        
-        Context Evidence:
-        {context_str}
-        
-        Please provide a comprehensive answer based ONLY on the provided context.
-        """
+User Query: {request.query}
+
+--- START OF KNOWLEDGE GRAPH CONTEXT ---
+{context_str}
+--- END OF KNOWLEDGE GRAPH CONTEXT ---
+
+Please provide your answer based ONLY on the context above.
+"""
 
         async for chunk in self.orchestrator.llm_generator.astream(
             prompt,
-            "You are a senior software architect AI. Answer questions using only the provided context.",
+            system_message,
         ):
             yield chunk

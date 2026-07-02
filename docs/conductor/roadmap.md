@@ -72,27 +72,27 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 ### Phase 10: VSCode Extension
 *   **Summary**: Deliver the ultimate user experience by integrating the Context and Reasoning engines directly into the IDE, providing real-time architectural insights.
 *   **Detailed Spec**: `tracks/phase-10-extension/spec.md`
-*   **Status**: In Progress ⏳
+*   **Status**: Completed ✅
 
 ### Phase 10.5: MVP Polish, QA & Packaging
 *   **Summary**: End-to-end testing, bug fixing, improving AI accuracy, and packaging the CLI and VSCode extension for public release.
 *   **Detailed Spec**: `tracks/phase-10.5-release/spec.md`
-*   **Status**: Planned 🔮
+*   **Status**: Completed ✅
 
 ---
 
 ## Future Expansions (Post-MVP)
 
-### Phase 11: Web Dashboard (UI/UX)
-*   **Summary**: A frontend platform (e.g., Next.js/React) to visually explore the knowledge graph, view architectural node/edge graphs, and configure system settings.
+### Phase 11: Multi-Agent Swarm
+*   **Summary**: Upgrade from a single Reasoning Agent to a swarm of specialized agents (Architect, QA, Security) that collaborate over the shared Knowledge Graph to resolve complex coding tasks.
 *   **Status**: Planned 🔮
 
 ### Phase 12: CI/CD & GitHub/GitLab Integration
 *   **Summary**: Integrate the engine into DevOps pipelines. Automatically scan code, run reasoning on PRs, and provide AI-driven architectural reviews on new commits.
 *   **Status**: Planned 🔮
 
-### Phase 13: Multi-Agent Swarm
-*   **Summary**: Upgrade from a single Reasoning Agent to a swarm of specialized agents (Architect, QA, Security) that collaborate over the shared Knowledge Graph.
+### Phase 13: Web Dashboard (UI/UX)
+*   **Summary**: A frontend platform (e.g., Next.js/React) to visually explore the knowledge graph, view architectural node/edge graphs, and configure system settings.
 *   **Status**: Planned 🔮
 
 ### Phase 14: Autonomous Code Generation & Execution
@@ -105,4 +105,8 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 
 ### Phase 16: Security, Auth & Multi-Tenancy (RBAC)
 *   **Summary**: Implement access control (OAuth2, JWT) and Node-level RBAC for multi-team environments to ensure code privacy and secure multi-tenant deployments.
+*   **Status**: Planned 🔮
+
+### Phase 17: Public Release (Marketplace & PyPI)
+*   **Summary**: Publish the VSCode Extension to the Microsoft Marketplace and the CLI tool to PyPI for global distribution. Create comprehensive onboarding documentation for end-users (Docker requirements, setup guides).
 *   **Status**: Planned 🔮

@@ -3,6 +3,7 @@
   "displayName": "AIEKP Reasoning Assistant",
   "description": "Integrates AIEKP Reasoning Engine into VSCode",
   "version": "1.0.0",
+  "publisher": "anhtunguyen05",
   "engines": {
     "vscode": "^1.90.0"
   },
