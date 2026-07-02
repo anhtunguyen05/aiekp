@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 from parser_core.factory import ParserFactory
 from metadata_extractor.factory import ExtractorFactory
@@ -8,8 +7,6 @@ from metadata_extractor.factory import ExtractorFactory
 # and their entry points will be picked up? 
 # Wait, let's look at how the app registers them. 
 # Usually, we just import them to register.
-import typescript_parser
-import typescript_extractor
 
 def test_ts_parsing():
     print("Testing TS Parsing...")
