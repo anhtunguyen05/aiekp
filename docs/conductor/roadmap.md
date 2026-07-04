@@ -87,8 +87,8 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 *   **Summary**: Upgrade from a single Reasoning Agent to a swarm of specialized agents (Architect, QA, Security) that collaborate over the shared Knowledge Graph to resolve complex coding tasks.
 *   **Status**: Completed ✅
 
-### Phase 12: CI/CD & Automated Architecture Governance
-*   **Summary**: Integrate the engine into DevOps pipelines (GitHub Actions/GitLab CI). Automatically scan code, run reasoning on PRs, and act as a tireless Senior Architect checking for security, compliance, and architectural drift.
+### Phase 12: Alpha Public Release & Cloud DB Integration
+*   **Summary**: Package AIEKP for PyPI (`pip install aiekp-cli`). Introduce global configuration (`aiekp config`) to support Cloud DBs (Neo4j Aura, Qdrant Cloud) and custom LLM API keys so users can run it instantly without local Docker containers.
 *   **Status**: Planned 🔮
 
 ### Phase 13: Web Dashboard & Visual Knowledge Graph

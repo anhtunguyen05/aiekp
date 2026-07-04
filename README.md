@@ -10,38 +10,42 @@ AIEKP is an AI-powered engineering knowledge platform that transforms your codeb
 - **Command Line Interface:** Manage Docker, API server, and ingestion tasks from the CLI.
 - **VSCode Extension:** Integrated AI chat and codebase reasoning directly inside your editor.
 
-## Quick Start (MVP Release)
+## Quick Start (Alpha Release)
 
-### 1. Prerequisites
+### 1. Installation
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (must be running to start the Neo4j instance).
-- Python 3.10+
-- [uv](https://github.com/astral-sh/uv) (for ultra-fast Python package management).
-
-### 2. Installation
-
-Clone the repository and install the CLI from source:
+AIEKP CLI is published on PyPI and can be installed via `pip`:
 
 ```bash
-git clone https://github.com/anhtunguyen05/aiekp.git
-cd aiekp
-
-# Install dependencies using uv
-uv sync
-
-# Run the CLI from the apps/cli directory using uv
-uv run --directory apps/cli aiekp --help
+pip install aiekp-cli
 ```
 
-### 3. Initialize Infrastructure
+### 2. Configuration (Cloud DB & LLM Keys)
 
-AIEKP requires a Neo4j database. You can automatically provision one using the CLI:
+AIEKP can connect to Cloud Databases (e.g., Neo4j Aura, Qdrant Cloud) and requires an LLM API key (OpenAI or Gemini). Set them globally using the CLI:
 
 ```bash
-uv run --directory apps/cli aiekp init
+# Set LLM API Key
+aiekp config set GEMINI_API_KEY "your-api-key"
+
+# (Optional) Set Cloud Database URI if you don't want to run Docker locally
+aiekp config set NEO4J_URI "neo4j+s://xxxxxx.databases.neo4j.io"
+aiekp config set NEO4J_PASSWORD "your-neo4j-password"
 ```
 
-*This will download the Neo4j image and start a container named `aiekp-neo4j` on port 7687.*
+To view your current configuration:
+```bash
+aiekp config list
+```
+
+### 3. Local Infrastructure (Optional)
+
+If you prefer to run the databases locally instead of using a Cloud DB, ensure you have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and run:
+
+```bash
+aiekp init
+```
+*This will start a local Neo4j container on port 7687.*
 
 ### 4. Start the API Server
 
