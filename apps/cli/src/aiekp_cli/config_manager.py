@@ -6,9 +6,11 @@ from typing import Dict, Any
 CONFIG_DIR = Path.home() / ".aiekp"
 CONFIG_FILE = CONFIG_DIR / "config.json"
 
+
 def _ensure_config_dir():
     if not CONFIG_DIR.exists():
         CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+
 
 def read_config() -> Dict[str, Any]:
     """Reads the global configuration from ~/.aiekp/config.json."""
@@ -20,6 +22,7 @@ def read_config() -> Dict[str, Any]:
     except json.JSONDecodeError:
         return {}
 
+
 def write_config(key: str, value: str) -> None:
     """Writes a key-value pair to the global configuration."""
     _ensure_config_dir()
@@ -27,6 +30,7 @@ def write_config(key: str, value: str) -> None:
     config[key] = value
     with open(CONFIG_FILE, "w") as f:
         json.dump(config, f, indent=4)
+
 
 def inject_config_to_env() -> None:
     """Injects the global configuration into os.environ.
