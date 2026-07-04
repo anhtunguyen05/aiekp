@@ -1,6 +1,6 @@
 [project]
 name = "aiekp-cli"
-version = "0.1.1"
+version = "0.1.2"
 description = "Command Line Interface for AIEKP (AI Engineering Knowledge Platform)"
 readme = "README.md"
 authors = [
