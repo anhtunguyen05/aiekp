@@ -5,6 +5,20 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
+# Load global configuration
+import json
+from pathlib import Path
+global_config_file = Path.home() / ".aiekp" / "config.json"
+if global_config_file.exists():
+    try:
+        with open(global_config_file, "r") as f:
+            global_config = json.load(f)
+            for k, v in global_config.items():
+                if k not in os.environ:
+                    os.environ[k] = str(v)
+    except Exception as e:
+        print(f"Warning: Failed to load global config from {global_config_file}: {e}")
+
 from fastapi import FastAPI, Depends  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from strawberry.fastapi import GraphQLRouter  # noqa: E402

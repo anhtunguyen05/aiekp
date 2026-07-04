@@ -5,12 +5,47 @@ from rich.console import Console
 from rich.table import Table
 from rich.markdown import Markdown
 from aiekp_cli.config import API_URL
+from aiekp_cli import config_manager
 import subprocess
 
 app = typer.Typer(
     help="AIEKP Command Line Interface - Interact with your AI Engineering Knowledge Platform"
 )
 console = Console()
+
+config_app = typer.Typer(help="Manage AIEKP global configuration")
+app.add_typer(config_app, name="config")
+
+@config_app.command("set")
+def config_set(key: str, value: str):
+    """Set a global configuration value (e.g., GEMINI_API_KEY)."""
+    config_manager.write_config(key, value)
+    console.print(f"[bold green]Successfully set {key}![/bold green]")
+
+@config_app.command("list")
+def config_list():
+    """List all global configuration values."""
+    config = config_manager.read_config()
+    if not config:
+        console.print("[yellow]No configuration found. Use 'aiekp config set' to add keys.[/yellow]")
+        return
+    
+    table = Table(title="AIEKP Global Configuration")
+    table.add_column("Key", style="cyan")
+    table.add_column("Value", style="green")
+    
+    for key, value in config.items():
+        # Mask API keys and passwords
+        display_value = value
+        if "KEY" in key.upper() or "PASSWORD" in key.upper() or "SECRET" in key.upper():
+            if len(value) > 8:
+                display_value = value[:4] + "*" * (len(value) - 8) + value[-4:]
+            else:
+                display_value = "***"
+        table.add_row(key, display_value)
+        
+    console.print(table)
+
 
 
 @app.command()
