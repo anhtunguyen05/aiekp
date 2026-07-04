@@ -1,13 +1,13 @@
+import json
 import os
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+from pathlib import Path
 
 # Load environment variables from .env file
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 # Load global configuration
-import json
-from pathlib import Path
 global_config_file = Path.home() / ".aiekp" / "config.json"
 if global_config_file.exists():
     try:
