@@ -49,7 +49,7 @@ export function NodeDetailPanel({ nodes }: { nodes: RFNode[] }) {
   }
 
   const selectedNode = nodes.find(n => n.id === selectedNodeId);
-  const originalData = selectedNode?.data?.originalData as any;
+  const originalData = selectedNode?.data?.originalData as Record<string, unknown>;
   const nodeLabel = selectedNode?.data?.label as string;
 
   const handleAnalyzeImpact = () => {
@@ -122,7 +122,7 @@ export function NodeDetailPanel({ nodes }: { nodes: RFNode[] }) {
         </h2>
         <div className="mt-1 flex items-center gap-2">
           <span className="inline-flex items-center rounded-full bg-zinc-800 px-2 py-1 text-xs font-medium text-zinc-300">
-            {originalData?.type || 'Unknown'}
+            {(originalData?.type as string) || 'Unknown'}
           </span>
         </div>
       </div>
@@ -208,7 +208,7 @@ export function NodeDetailPanel({ nodes }: { nodes: RFNode[] }) {
       <div className="p-4 flex-1">
         <h3 className="text-sm font-medium text-zinc-400 uppercase tracking-wider mb-3">Properties</h3>
         <dl className="space-y-3">
-          {originalData?.properties && Object.entries(originalData.properties).map(([key, value]) => (
+          {(originalData?.properties as Record<string, unknown> | undefined) && Object.entries(originalData.properties as Record<string, unknown>).map(([key, value]) => (
             <div key={key} className="break-all">
               <dt className="text-xs text-zinc-500">{key}</dt>
               <dd className="text-sm text-zinc-200 mt-1">

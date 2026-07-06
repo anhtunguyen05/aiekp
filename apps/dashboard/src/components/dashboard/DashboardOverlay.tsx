@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import StatsCard from "./StatsCard";
-import { File, Box, Braces, Link, Database, RefreshCw, Trash2 } from "lucide-react";
+import { File, Box, Braces, Link, RefreshCw, Trash2 } from "lucide-react";
 import { useGetStatsQuery, aiekpApi } from "@/store/api/aiekpApi";
 import { useDispatch } from "react-redux";
 
@@ -78,7 +77,7 @@ export function DashboardOverlay() {
             <Link size={16} /> Complexity Hotspots
           </h3>
           <ul className="space-y-3">
-            {data.hotspots.map((hotspot: any) => (
+            {data.hotspots.map((hotspot: { id: string, label: string, impact_score: number, connections: number }) => (
               <li key={hotspot.id} className="flex justify-between items-center text-sm">
                 <span className="text-zinc-300 truncate w-40" title={hotspot.label}>
                   {hotspot.label}

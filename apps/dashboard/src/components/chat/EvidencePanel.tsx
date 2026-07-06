@@ -2,10 +2,15 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { setHighlightedNodeIds, setSelectedNodeId } from '@/store/graphSlice';
 import { ChevronDown, ChevronRight, Layers, FileCode, SearchCode, Folder } from 'lucide-react';
-import { AffectedNode } from '@/lib/api-types'; // Reuse this type or similar
+export interface EvidenceSource {
+  id: string;
+  type: string;
+  label: string;
+  snippet?: string;
+}
 
 interface EvidenceProps {
-  sources: AffectedNode[];
+  sources: EvidenceSource[];
 }
 
 export function EvidencePanel({ sources }: EvidenceProps) {

@@ -36,7 +36,7 @@ export function ChatBox() {
     if (!text.trim() || isLoading) return;
 
     const userMessage: ChatMessage = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       role: 'user',
       content: text.trim(),
     };
@@ -45,7 +45,7 @@ export function ChatBox() {
     setInput('');
     setIsLoading(true);
 
-    const assistantMessageId = (Date.now() + 1).toString();
+    const assistantMessageId = crypto.randomUUID();
     setMessages((prev) => [
       ...prev,
       { id: assistantMessageId, role: 'assistant', content: '', isStreaming: true },
@@ -87,7 +87,7 @@ export function ChatBox() {
                 if (parsed.type === 'message' || parsed.type === 'status' || parsed.type === 'error') {
                   currentContent += (currentContent ? '\n' : '') + parsed.content;
                 } else if (parsed.type === 'evidence') {
-                  sources = parsed.data.map((s: any) => ({
+                  sources = parsed.data.map((s: { node_id: string; type: string; label: string; snippet: string }) => ({
                     id: s.node_id,
                     type: s.type,
                     label: s.label,
@@ -97,14 +97,16 @@ export function ChatBox() {
                   }));
                 }
                 
+                const nextContent = currentContent;
+                const nextSources = sources;
                 setMessages((prev) => 
                   prev.map((m) => 
                     m.id === assistantMessageId 
-                      ? { ...m, content: currentContent, sources } 
+                      ? { ...m, content: nextContent, sources: nextSources } 
                       : m
                   )
                 );
-              } catch (e) {
+              } catch {
                 console.error("Failed to parse SSE data", data);
               }
             }

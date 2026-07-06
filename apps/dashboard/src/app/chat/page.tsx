@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ChatBox } from '@/components/chat/ChatBox';
 import { KnowledgeGraph } from '@/components/graph/KnowledgeGraph';
 import { Provider } from 'react-redux';

@@ -9,9 +9,26 @@ from src.schemas import IngestRequest, IngestResponse
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
 
-# In-memory store for ingestion progress
-# Key: repo path or id, Value: {"status": "running"|"completed"|"error", "progress": 0-100, "current_file": "", "total_files": 0, "processed_files": 0}
-scan_status = {}
+STATUS_FILE = os.path.join(os.path.dirname(__file__), "..", "..", "scan_status.json")
+
+def load_status():
+    if os.path.exists(STATUS_FILE):
+        try:
+            with open(STATUS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+    return {}
+
+def save_status(status_dict):
+    try:
+        with open(STATUS_FILE, "w", encoding="utf-8") as f:
+            json.dump(status_dict, f, indent=2)
+    except Exception as e:
+        print(f"Failed to save scan status: {e}")
+
+# In-memory store for ingestion progress, backed by STATUS_FILE
+scan_status = load_status()
 
 
 def process_repository(repo_path: str, ingestor: GraphIngestor):
@@ -87,10 +104,14 @@ def process_repository(repo_path: str, ingestor: GraphIngestor):
         processed_files += 1
         scan_status[repo_path]["processed_files"] = processed_files
         scan_status[repo_path]["progress"] = int((processed_files / total_files) * 100) if total_files > 0 else 100
+        
+        if processed_files % 10 == 0:
+            save_status(scan_status)
 
     scan_status[repo_path]["status"] = "completed"
     scan_status[repo_path]["progress"] = 100
     scan_status[repo_path]["current_file"] = ""
+    save_status(scan_status)
 
 
 @router.post("/", response_model=IngestResponse)
@@ -112,6 +133,7 @@ async def trigger_ingestion(
         "total_files": 0,
         "processed_files": 0
     }
+    save_status(scan_status)
 
     background_tasks.add_task(process_repository, repo_path, ingestor)
     return IngestResponse(

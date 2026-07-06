@@ -100,7 +100,7 @@ function FlowCanvas({ initialNodes, initialEdges }: GraphCanvasProps) {
       const semanticEdgesMap = new Map<string, RFEdge>();
 
       initialEdges.forEach(e => {
-        const rawType = (e.data?.originalData as any)?.type as string;
+        const rawType = (e.data?.originalData as Record<string, unknown>)?.type as string;
         // Skip structural edges — they are already covered by parentId hierarchy
         if (rawType === 'DEFINES' || rawType === 'CONTAINS') return;
 
@@ -195,7 +195,7 @@ function FlowCanvas({ initialNodes, initialEdges }: GraphCanvasProps) {
         return { ...edge, style: { ...edge.style, opacity, transition: 'opacity 0.3s ease' } };
       })
     );
-  }, [selectedNodeId, highlightedNodeIds, searchQuery, setNodes, setEdges]);
+  }, [selectedNodeId, highlightedNodeIds, searchQuery, setNodes, setEdges, dispatch, initialNodes]);
 
   const onNodeClick = useCallback((_event: React.MouseEvent, node: RFNode) => {
     dispatch(setSelectedNodeId(node.id));

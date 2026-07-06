@@ -58,7 +58,7 @@ export function RepositoryProgress({ repoPath }: RepositoryProgressProps) {
     return () => {
       eventSource.close();
     };
-  }, [repoPath]);
+  }, [repoPath, dispatch]);
 
   if (!status) {
     return (

@@ -36,7 +36,7 @@ export const aiekpApi = createApi({
     }),
     getNodeById: builder.query<unknown, string>({ query: (id) => `/graph/nodes/${encodeURIComponent(id)}` }),
     getImpact: builder.query<ImpactAnalysisResponse, string>({ query: (id) => `/graph/impact/${encodeURIComponent(id)}` }),
-    getStats: builder.query<any, void>({ 
+    getStats: builder.query<{ nodes_by_label: Record<string, number>; hotspots: { id: string; label: string; impact_score: number; connections: number }[] }, void>({ 
       query: () => '/stats',
       providesTags: ['Stats']
     }),

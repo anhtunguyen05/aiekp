@@ -14,12 +14,12 @@ const glassClasses = "bg-zinc-900/60 backdrop-blur-md border border-white/10 sha
 export interface CustomNodeData extends Record<string, unknown> {
   label: string;
   type: string;
-  originalData: any;
+  originalData: Record<string, unknown>;
   parentId?: string;
   isExpandable?: boolean; // determined if there are edges connecting out to children
 }
 
-const BaseNode = ({ data, selected, children, colorClass }: { data: CustomNodeData, selected: boolean, children: React.ReactNode, colorClass: string }) => {
+const BaseNode = ({ selected, children, colorClass }: { data: CustomNodeData, selected: boolean, children: React.ReactNode, colorClass: string }) => {
   return (
     <div className={`relative px-4 py-3 rounded-2xl min-w-[200px] max-w-[280px] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
       ${glassClasses}
