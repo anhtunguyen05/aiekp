@@ -32,7 +32,10 @@ async def reason_stream(
 
         async for chunk in reasoning_service.stream_process_query(request):
             # Format as SSE
-            payload = json.dumps({"content": chunk})
+            if isinstance(chunk, dict):
+                payload = json.dumps(chunk)
+            else:
+                payload = json.dumps({"type": "message", "content": str(chunk)})
             yield f"data: {payload}\n\n"
         yield "data: [DONE]\n\n"
 

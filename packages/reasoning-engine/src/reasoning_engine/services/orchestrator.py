@@ -9,7 +9,7 @@ class GraphState(TypedDict):
     query: str
     session_id: str
     context_accumulated: List[Dict[str, Any]]
-    sources_used: List[str]
+    sources_used: List[Dict[str, Any]]
     messages: List[BaseMessage]
     error: Optional[str]
     next_agent: str
@@ -66,9 +66,16 @@ class ReasoningOrchestrator:
             new_context.append(payload)
 
             sources = state.get("sources_used", [])
+            seen_ids = {s["node_id"] for s in sources}
             for node in payload.get("nodes", []):
-                if node["id"] not in sources:
-                    sources.append(node["id"])
+                if node["id"] not in seen_ids:
+                    sources.append({
+                        "node_id": node["id"],
+                        "type": node.get("type", "Unknown"),
+                        "label": node.get("properties", {}).get("name") or node.get("id"),
+                        "snippet": node.get("properties", {}).get("docstring") or ""
+                    })
+                    seen_ids.add(node["id"])
 
             return {
                 "context_accumulated": new_context,

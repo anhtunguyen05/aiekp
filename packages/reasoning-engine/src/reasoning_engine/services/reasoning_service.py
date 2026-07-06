@@ -54,23 +54,25 @@ class ReasoningService(IReasoningService):
         config = {"configurable": {"thread_id": request.session_id}}
 
         try:
-            yield "Initializing Multi-Agent Swarm...\\n"
+            yield {"type": "status", "content": "Initializing Multi-Agent Swarm..."}
             async for output in self.orchestrator.graph.astream(
                 initial_state, config=config
             ):
                 for node_name, state_update in output.items():
                     if node_name == "fetch_context":
-                        yield "[System] Context fetched from Knowledge Graph.\\n"
+                        yield {"type": "status", "content": "[System] Context fetched from Knowledge Graph."}
                     elif node_name == "supervisor":
                         next_agent = state_update.get("next_agent")
                         if next_agent == "FINISH":
+                            sources = state_update.get("sources_used", [])
+                            if sources:
+                                yield {"type": "evidence", "data": sources}
                             messages = state_update.get("messages", [])
                             if messages:
-                                yield "\\n--- Final Answer ---\\n"
-                                yield messages[-1].content
+                                yield {"type": "message", "content": messages[-1].content}
                         else:
-                            yield f"\\n[Supervisor] Routing query to {next_agent.upper()} Agent for specialized analysis...\\n"
+                            yield {"type": "status", "content": f"[Supervisor] Routing query to {next_agent.upper()} Agent for specialized analysis..."}
                     elif node_name in ["architect", "qa", "security"]:
-                        yield f"[{node_name.capitalize()} Agent] Analysis complete.\\n"
+                        yield {"type": "status", "content": f"[{node_name.capitalize()} Agent] Analysis complete."}
         except Exception as e:
-            yield f"\\nError during multi-agent reasoning: {str(e)}"
+            yield {"type": "error", "content": f"Error during multi-agent reasoning: {str(e)}"}

@@ -15,5 +15,6 @@ members = [
     "plugins/typescript_extractor",
 ]
 exclude = [
-    "apps/vscode-extension"
+    "apps/vscode-extension",
+    "apps/dashboard"
 ]

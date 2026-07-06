@@ -18,7 +18,7 @@ class PythonParser(LanguageParser):
     def supported_extensions(self) -> List[str]:
         return [".py", ".pyw"]
 
-    def parse(self, file_content: bytes) -> AiekpAstNode:
+    def parse(self, file_content: bytes, file_path: str = "") -> AiekpAstNode:
         """
         Parses python source code into a normalized AiekpAstNode.
         """
