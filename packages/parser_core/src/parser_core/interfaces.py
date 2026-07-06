@@ -18,7 +18,7 @@ class LanguageParser(ABC):
         pass
 
     @abstractmethod
-    def parse(self, file_content: bytes) -> AiekpAstNode:
+    def parse(self, file_content: bytes, file_path: str = "") -> AiekpAstNode:
         """
         Parses raw source code into a normalized AIEKP AST.
 

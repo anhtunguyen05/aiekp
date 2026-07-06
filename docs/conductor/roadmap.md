@@ -89,11 +89,13 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 
 ### Phase 12: Alpha Public Release & Cloud DB Integration
 *   **Summary**: Package AIEKP for PyPI (`pip install aiekp-cli`). Introduce global configuration (`aiekp config`) to support Cloud DBs (Neo4j Aura, Qdrant Cloud) and custom LLM API keys so users can run it instantly without local Docker containers.
-*   **Status**: Planned 🔮
+*   **Detailed Spec**: `tracks/phase-12-public-release/spec.md`
+*   **Status**: Completed ✅
 
 ### Phase 13: Web Dashboard & Visual Knowledge Graph
-*   **Summary**: A frontend platform (e.g., Next.js/React) to visually explore the knowledge graph, trace Impact Analysis visually (e.g. clicking a DB column to see affected UI components), and configure system rules.
-*   **Status**: Planned 🔮
+*   **Summary**: A Next.js/TypeScript dashboard with a React Flow + ELK.js powered hierarchical Knowledge Graph (Folder→File→Class→Function drill-down), Impact Analysis visualization, AI Chat interface with Evidence display, and Repository Management panel.
+*   **Detailed Spec**: `tracks/phase-13-web-dashboard/spec.md`
+*   **Status**: In Progress 🚧 (Giai đoạn 2/4 hoàn thành)
 
 ### Phase 14: Enterprise Intelligence Features
 *   **Summary**: Implement "Killer Features" such as System-wide Impact Analysis APIs, Custom Architectural Rule Engines, and Automated Onboarding Document Generation based on current codebase context.

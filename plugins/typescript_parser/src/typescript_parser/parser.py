@@ -24,19 +24,18 @@ class TypescriptParser(LanguageParser):
     def supported_extensions(self) -> List[str]:
         return [".ts", ".tsx", ".js", ".jsx"]
 
-    def parse(self, file_content: str, file_path: str) -> AiekpAstNode:
+    def parse(self, file_content: bytes, file_path: str = "") -> AiekpAstNode:
         """
         Parses TS/JS source code into a normalized AiekpAstNode.
         """
-        source_bytes = file_content.encode("utf-8")
-        if file_path.endswith(".tsx"):
-            tree = self.tsx_parser.parse(source_bytes)
+        if file_path.endswith(".tsx") or file_path.endswith(".jsx"):
+            tree = self.tsx_parser.parse(file_content)
         elif file_path.endswith(".ts"):
-            tree = self.ts_parser.parse(source_bytes)
+            tree = self.ts_parser.parse(file_content)
         else:
-            tree = self.js_parser.parse(source_bytes)
+            tree = self.js_parser.parse(file_content)
 
-        return self._map_node(tree.root_node, source_bytes)
+        return self._map_node(tree.root_node, file_content)
 
     def _map_node(self, node: Node, source: bytes) -> AiekpAstNode:
         """

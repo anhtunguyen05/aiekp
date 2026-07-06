@@ -19,6 +19,12 @@ class Neo4jGraphManager:
         with self.driver.session() as session:
             return session.run(query, parameters).data()
 
+    def clear_database(self):
+        """
+        Deletes all nodes and relationships in the database.
+        """
+        self._execute_query("MATCH (n) DETACH DELETE n")
+
     def ingest_file_metadata(self, metadata: FileMetadata):
         """
         Upserts the file metadata, including its classes and functions, into Neo4j.

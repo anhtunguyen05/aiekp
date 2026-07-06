@@ -9,7 +9,7 @@ class ReasoningRequest(BaseModel):
 
 class ReasoningResult(BaseModel):
     answer: str
-    sources_used: List[str]
+    sources_used: List[Dict[str, Any]]
     confidence_score: float
 
 
@@ -21,6 +21,6 @@ class ReasoningState(BaseModel):
     is_context_sufficient: bool = False
     iterations: int = 0
     final_answer: Optional[str] = None
-    sources_used: List[str] = []
+    sources_used: List[Dict[str, Any]] = []
     confidence_score: float = 0.0
     error: Optional[str] = None
