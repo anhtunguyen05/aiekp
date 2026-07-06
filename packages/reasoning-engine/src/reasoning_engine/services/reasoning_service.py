@@ -60,7 +60,10 @@ class ReasoningService(IReasoningService):
             ):
                 for node_name, state_update in output.items():
                     if node_name == "fetch_context":
-                        yield {"type": "status", "content": "[System] Context fetched from Knowledge Graph."}
+                        yield {
+                            "type": "status",
+                            "content": "[System] Context fetched from Knowledge Graph.",
+                        }
                     elif node_name == "supervisor":
                         next_agent = state_update.get("next_agent")
                         if next_agent == "FINISH":
@@ -69,10 +72,22 @@ class ReasoningService(IReasoningService):
                                 yield {"type": "evidence", "data": sources}
                             messages = state_update.get("messages", [])
                             if messages:
-                                yield {"type": "message", "content": messages[-1].content}
+                                yield {
+                                    "type": "message",
+                                    "content": messages[-1].content,
+                                }
                         else:
-                            yield {"type": "status", "content": f"[Supervisor] Routing query to {next_agent.upper()} Agent for specialized analysis..."}
+                            yield {
+                                "type": "status",
+                                "content": f"[Supervisor] Routing query to {next_agent.upper()} Agent for specialized analysis...",
+                            }
                     elif node_name in ["architect", "qa", "security"]:
-                        yield {"type": "status", "content": f"[{node_name.capitalize()} Agent] Analysis complete."}
+                        yield {
+                            "type": "status",
+                            "content": f"[{node_name.capitalize()} Agent] Analysis complete.",
+                        }
         except Exception as e:
-            yield {"type": "error", "content": f"Error during multi-agent reasoning: {str(e)}"}
+            yield {
+                "type": "error",
+                "content": f"Error during multi-agent reasoning: {str(e)}",
+            }

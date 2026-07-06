@@ -69,12 +69,16 @@ class ReasoningOrchestrator:
             seen_ids = {s["node_id"] for s in sources}
             for node in payload.get("nodes", []):
                 if node["id"] not in seen_ids:
-                    sources.append({
-                        "node_id": node["id"],
-                        "type": node.get("type", "Unknown"),
-                        "label": node.get("properties", {}).get("name") or node.get("id"),
-                        "snippet": node.get("properties", {}).get("docstring") or ""
-                    })
+                    sources.append(
+                        {
+                            "node_id": node["id"],
+                            "type": node.get("type", "Unknown"),
+                            "label": node.get("properties", {}).get("name")
+                            or node.get("id"),
+                            "snippet": node.get("properties", {}).get("docstring")
+                            or "",
+                        }
+                    )
                     seen_ids.add(node["id"])
 
             return {

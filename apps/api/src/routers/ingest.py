@@ -11,6 +11,7 @@ router = APIRouter(prefix="/ingest", tags=["ingest"])
 
 STATUS_FILE = os.path.join(os.path.dirname(__file__), "..", "..", "scan_status.json")
 
+
 def load_status():
     if os.path.exists(STATUS_FILE):
         try:
@@ -20,12 +21,14 @@ def load_status():
             return {}
     return {}
 
+
 def save_status(status_dict):
     try:
         with open(STATUS_FILE, "w", encoding="utf-8") as f:
             json.dump(status_dict, f, indent=2)
     except Exception as e:
         print(f"Failed to save scan status: {e}")
+
 
 # In-memory store for ingestion progress, backed by STATUS_FILE
 scan_status = load_status()
@@ -44,7 +47,7 @@ def process_repository(repo_path: str, ingestor: GraphIngestor):
     from parser_core.factory import ParserFactory
     from python_parser.parser import PythonParser
     import typescript_parser.parser as ts_parser
-    
+
     from metadata_extractor.factory import ExtractorFactory
     import python_extractor as python_ext
     import typescript_extractor.extractor as ts_ext
@@ -63,20 +66,26 @@ def process_repository(repo_path: str, ingestor: GraphIngestor):
     supported_extensions = (".py", ".ts", ".tsx", ".js", ".jsx")
     target_files = []
     for root, _, files in os.walk(repo_path):
-        if ".git" in root or ".venv" in root or "__pycache__" in root or "node_modules" in root or ".next" in root:
+        if (
+            ".git" in root
+            or ".venv" in root
+            or "__pycache__" in root
+            or "node_modules" in root
+            or ".next" in root
+        ):
             continue
         for file in files:
             if file.endswith(supported_extensions):
                 target_files.append(os.path.join(root, file))
-                
+
     total_files = len(target_files)
-    
+
     scan_status[repo_path] = {
         "status": "running",
         "progress": 0,
         "current_file": "",
         "total_files": total_files,
-        "processed_files": 0
+        "processed_files": 0,
     }
 
     processed_files = 0
@@ -100,11 +109,13 @@ def process_repository(repo_path: str, ingestor: GraphIngestor):
             print(f"Successfully ingested {file_path}")
         except Exception as e:
             print(f"Error processing {file_path}: {e}")
-            
+
         processed_files += 1
         scan_status[repo_path]["processed_files"] = processed_files
-        scan_status[repo_path]["progress"] = int((processed_files / total_files) * 100) if total_files > 0 else 100
-        
+        scan_status[repo_path]["progress"] = (
+            int((processed_files / total_files) * 100) if total_files > 0 else 100
+        )
+
         if processed_files % 10 == 0:
             save_status(scan_status)
 
@@ -131,7 +142,7 @@ async def trigger_ingestion(
         "progress": 0,
         "current_file": "",
         "total_files": 0,
-        "processed_files": 0
+        "processed_files": 0,
     }
     save_status(scan_status)
 
@@ -149,26 +160,29 @@ async def get_progress(request: Request, repo_path: str):
     Usage: /ingest/progress?repo_path=/absolute/path/to/repo
     """
     repo_path = os.path.abspath(repo_path)
-    
+
     async def event_generator():
         while True:
             # If client disconnects, break
             if await request.is_disconnected():
                 break
-                
-            status_data = scan_status.get(repo_path, {
-                "status": "unknown",
-                "progress": 0,
-                "current_file": "",
-                "total_files": 0,
-                "processed_files": 0
-            })
-            
+
+            status_data = scan_status.get(
+                repo_path,
+                {
+                    "status": "unknown",
+                    "progress": 0,
+                    "current_file": "",
+                    "total_files": 0,
+                    "processed_files": 0,
+                },
+            )
+
             yield f"data: {json.dumps(status_data)}\n\n"
-            
+
             if status_data["status"] == "completed" or status_data["status"] == "error":
                 break
-                
+
             await asyncio.sleep(1)
-            
+
     return StreamingResponse(event_generator(), media_type="text/event-stream")

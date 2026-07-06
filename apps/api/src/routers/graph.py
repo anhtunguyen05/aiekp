@@ -8,7 +8,7 @@ router = APIRouter(prefix="/graph", tags=["graph"])
 @router.get("/nodes")
 async def get_all_nodes(
     limit: int = Query(10000, ge=1, le=50000),
-    graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager)
+    graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager),
 ):
     query = """
     MATCH (n)
@@ -16,21 +16,17 @@ async def get_all_nodes(
     LIMIT $limit
     """
     records, _, _ = graph_manager.driver.execute_query(query, limit=limit)
-    
+
     nodes = []
     for r in records:
-        nodes.append({
-            "id": r["id"],
-            "type": r["type"],
-            "properties": r["properties"]
-        })
+        nodes.append({"id": r["id"], "type": r["type"], "properties": r["properties"]})
     return {"nodes": nodes}
 
 
 @router.get("/edges")
 async def get_all_edges(
     limit: int = Query(10000, ge=1, le=50000),
-    graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager)
+    graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager),
 ):
     query = """
     MATCH (n)-[r]->(m)
@@ -38,15 +34,17 @@ async def get_all_edges(
     LIMIT $limit
     """
     records, _, _ = graph_manager.driver.execute_query(query, limit=limit)
-    
+
     edges = []
     for r in records:
-        edges.append({
-            "source": r["source"],
-            "target": r["target"],
-            "type": r["type"],
-            "properties": r["properties"]
-        })
+        edges.append(
+            {
+                "source": r["source"],
+                "target": r["target"],
+                "type": r["type"],
+                "properties": r["properties"],
+            }
+        )
     return {"edges": edges}
 
 
@@ -83,16 +81,16 @@ async def get_node_details(
 
 @router.get("/impact/{node_id:path}")
 async def get_impact_analysis(
-    node_id: str, 
+    node_id: str,
     depth: int = Query(5, ge=1, le=5),
-    graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager)
+    graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager),
 ):
     """
     Finds nodes that depend on this node (up to `depth` levels).
     This simulates an 'impact analysis' where modifying `node_id` affects other components.
     """
     node_id = node_id.replace("\\\\", "\\")
-    
+
     # Trace along any relationship (undirected) to show general dependency impact
     # Use variable length path and return path length as depth
     query = f"""
@@ -114,11 +112,13 @@ async def get_impact_analysis(
     ORDER BY depth
     """
     records, _, _ = graph_manager.driver.execute_query(query, node_id=node_id)
-    
+
     if not records:
         # Check if the source node exists at all
         check_query = "MATCH (n) WHERE coalesce(n.id, n.path) = $node_id RETURN coalesce(n.id, n.path) as id, coalesce(labels(n)[0], 'Unknown') as type, coalesce(n.name, n.path) as label"
-        check_records, _, _ = graph_manager.driver.execute_query(check_query, node_id=node_id)
+        check_records, _, _ = graph_manager.driver.execute_query(
+            check_query, node_id=node_id
+        )
         if not check_records:
             raise HTTPException(status_code=404, detail="Source node not found")
         source_node = {
@@ -136,15 +136,18 @@ async def get_impact_analysis(
 
     affected = []
     for r in records:
-        affected.append({
-            "id": r["id"],
-            "type": r["type"],
-            "label": r["label"],
-            "depth": r["depth"],
-            "via_relation": r["via_relation"]
-        })
-        
+        affected.append(
+            {
+                "id": r["id"],
+                "type": r["type"],
+                "label": r["label"],
+                "depth": r["depth"],
+                "via_relation": r["via_relation"],
+            }
+        )
+
     return {"source_node": source_node, "affected": affected}
+
 
 @router.delete("/")
 def clear_graph(graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager)):
@@ -156,4 +159,3 @@ def clear_graph(graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager)):
         return {"message": "Knowledge Graph cleared successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
