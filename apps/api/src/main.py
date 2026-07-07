@@ -23,7 +23,18 @@ from fastapi import FastAPI, Depends  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from strawberry.fastapi import GraphQLRouter  # noqa: E402
 from src.dependencies import init_dependencies, close_dependencies, verify_api_key  # noqa: E402
-from src.routers import health, scanner, ingest, search, graph, context, reason, stats  # noqa: E402
+from src.routers import (
+    health,
+    scanner,
+    ingest,
+    search,
+    graph,
+    context,
+    reason,
+    stats,
+    rules,
+    docs,
+)  # noqa: E402
 from src.config import settings  # noqa: E402
 from src.graphql_api.schema import schema  # noqa: E402
 
@@ -63,6 +74,8 @@ app.include_router(graph.router, dependencies=protected_dependencies)
 app.include_router(context.router, dependencies=protected_dependencies)
 app.include_router(reason.router, dependencies=protected_dependencies)
 app.include_router(stats.router, dependencies=protected_dependencies)
+app.include_router(rules.router, dependencies=protected_dependencies)
+app.include_router(docs.router, dependencies=protected_dependencies)
 
 graphql_app = GraphQLRouter(schema)
 app.include_router(graphql_app, prefix="/graphql", dependencies=protected_dependencies)

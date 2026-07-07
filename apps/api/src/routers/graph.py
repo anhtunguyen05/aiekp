@@ -82,19 +82,54 @@ async def get_node_details(
 @router.get("/impact/{node_id:path}")
 async def get_impact_analysis(
     node_id: str,
-    depth: int = Query(5, ge=1, le=5),
+    max_depth: int = Query(3, ge=1, le=5),
+    rel_types: list[str] = Query(default=[]),
     graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager),
 ):
     """
-    Finds nodes that depend on this node (up to `depth` levels).
+    Finds nodes that depend on this node (up to `max_depth` levels).
     This simulates an 'impact analysis' where modifying `node_id` affects other components.
     """
     node_id = node_id.replace("\\\\", "\\")
 
+    # First, verify the source node exists
+    check_query = "MATCH (n) WHERE coalesce(n.id, n.path) = $node_id RETURN coalesce(n.id, n.path) as id, coalesce(labels(n)[0], 'Unknown') as type, coalesce(n.name, n.path) as label"
+    check_records, _, _ = graph_manager.driver.execute_query(
+        check_query, node_id=node_id
+    )
+    if not check_records:
+        raise HTTPException(status_code=404, detail="Source node not found")
+
+    source_node = {
+        "id": check_records[0]["id"],
+        "type": check_records[0]["type"],
+        "label": check_records[0]["label"],
+    }
+
+    # Filter requested relationship types to avoid Neo4j warnings for non-existent types
+    types_records, _, _ = graph_manager.driver.execute_query(
+        "CALL db.relationshipTypes()"
+    )
+    existing_types = {r[0] for r in types_records}
+    valid_rel_types = [t for t in rel_types if t in existing_types] if rel_types else []
+
+    if rel_types and not valid_rel_types:
+        # None of the specifically requested relationship types exist in the DB
+        return {
+            "source_node": source_node,
+            "affected": {"direct": [], "indirect": []},
+            "total_count": 0,
+        }
+
+    rel_filter = "|".join(valid_rel_types) if valid_rel_types else ""
+    rel_query = (
+        f"[r:{rel_filter}*1..{max_depth}]" if rel_filter else f"[*1..{max_depth}]"
+    )
+
     # Trace along any relationship (undirected) to show general dependency impact
     # Use variable length path and return path length as depth
     query = f"""
-    MATCH p=(n)-[*1..{depth}]-(m)
+    MATCH p=(n)-{rel_query}-(m)
     WHERE coalesce(n.id, n.path) = $node_id
     WITH m, n, p, length(p) as depth
     // Deduplicate by taking the shortest path (minimum depth)
@@ -114,39 +149,32 @@ async def get_impact_analysis(
     records, _, _ = graph_manager.driver.execute_query(query, node_id=node_id)
 
     if not records:
-        # Check if the source node exists at all
-        check_query = "MATCH (n) WHERE coalesce(n.id, n.path) = $node_id RETURN coalesce(n.id, n.path) as id, coalesce(labels(n)[0], 'Unknown') as type, coalesce(n.name, n.path) as label"
-        check_records, _, _ = graph_manager.driver.execute_query(
-            check_query, node_id=node_id
-        )
-        if not check_records:
-            raise HTTPException(status_code=404, detail="Source node not found")
-        source_node = {
-            "id": check_records[0]["id"],
-            "type": check_records[0]["type"],
-            "label": check_records[0]["label"],
+        return {
+            "source_node": source_node,
+            "affected": {"direct": [], "indirect": []},
+            "total_count": 0,
         }
-        return {"source_node": source_node, "affected": []}
 
-    source_node = {
-        "id": records[0]["source_id"],
-        "type": records[0]["source_type"],
-        "label": records[0]["source_label"],
-    }
-
-    affected = []
+    direct = []
+    indirect = []
     for r in records:
-        affected.append(
-            {
-                "id": r["id"],
-                "type": r["type"],
-                "label": r["label"],
-                "depth": r["depth"],
-                "via_relation": r["via_relation"],
-            }
-        )
+        node_info = {
+            "id": r["id"],
+            "type": r["type"],
+            "label": r["label"],
+            "via_relation": r["via_relation"],
+        }
+        if r["depth"] == 1:
+            direct.append(node_info)
+        else:
+            node_info["depth"] = r["depth"]
+            indirect.append(node_info)
 
-    return {"source_node": source_node, "affected": affected}
+    return {
+        "source_node": source_node,
+        "affected": {"direct": direct, "indirect": indirect},
+        "total_count": len(direct) + len(indirect),
+    }
 
 
 @router.delete("/")
