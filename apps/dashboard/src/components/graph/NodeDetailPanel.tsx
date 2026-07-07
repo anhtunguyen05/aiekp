@@ -4,7 +4,7 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store';
 import { useGetImpactQuery, useGetNodesQuery } from '@/store/api/aiekpApi';
-import { setSelectedNodeId, setHighlightedNodeIds } from '@/store/graphSlice';
+import { setSelectedNodeId, setHighlightedNodeIds, setZoomToNodeId } from '@/store/graphSlice';
 import { Node as RFNode } from '@xyflow/react';
 import { AffectedNode } from '@/lib/api-types';
 import { Layers, FileCode, SearchCode, Folder } from 'lucide-react';
@@ -54,11 +54,13 @@ export function NodeDetailPanel({ nodes }: { nodes: RFNode[] }) {
 
   const handleAnalyzeImpact = () => {
     if (impactData?.affected) {
-      dispatch(setHighlightedNodeIds(impactData.affected.map((n) => n.id)));
+      const allAffected = [...impactData.affected.direct, ...impactData.affected.indirect];
+      dispatch(setHighlightedNodeIds(allAffected.map((n) => n.id)));
     } else {
       refetch().then((res) => {
         if (res.data?.affected) {
-          dispatch(setHighlightedNodeIds(res.data.affected.map((n) => n.id)));
+          const allAffected = [...res.data.affected.direct, ...res.data.affected.indirect];
+          dispatch(setHighlightedNodeIds(allAffected.map((n) => n.id)));
         }
       });
     }
@@ -69,17 +71,27 @@ export function NodeDetailPanel({ nodes }: { nodes: RFNode[] }) {
   };
 
   const handleExportMarkdown = () => {
-    if (!impactData || !impactData.affected.length) return;
+    if (!impactData) return;
+    const allAffected = [...impactData.affected.direct, ...impactData.affected.indirect];
+    if (allAffected.length === 0) return;
     
     let mdContent = `# Impact Analysis for ${impactData.source_node.label}\n\n`;
     mdContent += `**Type**: ${impactData.source_node.type}\n`;
     mdContent += `**ID**: \`${impactData.source_node.id}\`\n\n`;
     
-    const maxDepth = Math.max(...impactData.affected.map(n => n.depth));
-    for (let d = 1; d <= maxDepth; d++) {
-      const nodesAtDepth = impactData.affected.filter(n => n.depth === d);
+    if (impactData.affected.direct.length > 0) {
+      mdContent += `## Direct Impact (Depth 1)\n\n`;
+      impactData.affected.direct.forEach(n => {
+        mdContent += `- **${n.label}** (\`${n.type}\`) via _${n.via_relation}_\n`;
+      });
+      mdContent += '\n';
+    }
+    
+    const maxDepth = Math.max(...impactData.affected.indirect.map(n => n.depth || 0), 0);
+    for (let d = 2; d <= maxDepth; d++) {
+      const nodesAtDepth = impactData.affected.indirect.filter(n => n.depth === d);
       if (nodesAtDepth.length > 0) {
-        mdContent += `## Depth ${d} (${d === 1 ? 'Direct' : 'Indirect'})\n\n`;
+        mdContent += `## Indirect Impact (Depth ${d})\n\n`;
         nodesAtDepth.forEach(n => {
           mdContent += `- **${n.label}** (\`${n.type}\`) via _${n.via_relation}_\n`;
         });
@@ -107,12 +119,6 @@ export function NodeDetailPanel({ nodes }: { nodes: RFNode[] }) {
     }
   };
 
-  // Group affected nodes by depth
-  const affectedByDepth = impactData?.affected ? impactData.affected.reduce((acc, node) => {
-    if (!acc[node.depth]) acc[node.depth] = [];
-    acc[node.depth].push(node);
-    return acc;
-  }, {} as Record<number, AffectedNode[]>) : {};
 
   return (
     <div className="w-96 bg-zinc-900 border-l border-zinc-800 h-full overflow-y-auto flex flex-col shadow-xl z-20">
@@ -130,7 +136,7 @@ export function NodeDetailPanel({ nodes }: { nodes: RFNode[] }) {
       <div className="p-4 border-b border-zinc-800">
         <h3 className="text-sm font-medium text-zinc-400 uppercase tracking-wider mb-3">Actions</h3>
         
-        {originalData?.type === 'Directory' ? (
+        {selectedNode?.type === 'Directory' ? (
           <div className="text-sm text-zinc-500 italic text-center p-2 bg-zinc-950/50 rounded-md border border-zinc-800">
             Impact analysis is not available for directory nodes.
           </div>
@@ -146,12 +152,12 @@ export function NodeDetailPanel({ nodes }: { nodes: RFNode[] }) {
             ) : (
               <button
                 onClick={handleAnalyzeImpact}
-                disabled={isLoadingImpact || (impactData && impactData.affected.length === 0)}
+                disabled={isLoadingImpact || (impactData && (impactData.affected.direct.length + impactData.affected.indirect.length) === 0)}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:bg-zinc-700 disabled:text-zinc-400"
               >
                 {isLoadingImpact 
                   ? 'Analyzing...' 
-                  : (impactData && impactData.affected.length === 0 
+                  : (impactData && (impactData.affected.direct.length + impactData.affected.indirect.length) === 0 
                       ? 'No Impact Found' 
                       : 'Analyze Impact')}
               </button>
@@ -162,10 +168,12 @@ export function NodeDetailPanel({ nodes }: { nodes: RFNode[] }) {
         )}
       </div>
 
-      {highlightedNodeIds.length > 0 && impactData?.affected && impactData.affected.length > 0 && (
+      {highlightedNodeIds.length > 0 && impactData?.affected && (impactData.affected.direct.length > 0 || impactData.affected.indirect.length > 0) && (
         <div className="p-4 border-b border-zinc-800">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">Affected Nodes</h3>
+            <h3 className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
+              Affected Nodes <span className="ml-1 px-1.5 py-0.5 rounded-full bg-zinc-800 text-xs text-zinc-300">{impactData.total_count}</span>
+            </h3>
             <button 
               onClick={handleExportMarkdown}
               className="text-xs text-blue-400 hover:text-blue-300"
@@ -174,17 +182,56 @@ export function NodeDetailPanel({ nodes }: { nodes: RFNode[] }) {
             </button>
           </div>
           <div className="space-y-4">
-            {Object.entries(affectedByDepth).map(([depth, nodes]) => (
+            {impactData.affected.direct.length > 0 && (
+              <div>
+                <h4 className="text-xs font-semibold text-zinc-500 mb-2">Direct Impact</h4>
+                <ul className="space-y-2">
+                  {impactData.affected.direct.map(node => (
+                    <li 
+                      key={node.id}
+                      className="flex flex-col gap-1 p-2 rounded bg-zinc-950/50 hover:bg-zinc-800/80 cursor-pointer border border-zinc-800/50"
+                      onClick={() => {
+                        dispatch(setSelectedNodeId(node.id));
+                        dispatch(setZoomToNodeId(node.id));
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        {getNodeIcon(node.type)}
+                        <span className="text-sm font-medium text-zinc-200 truncate" title={node.label}>{node.label}</span>
+                      </div>
+                      <div className="flex justify-between items-center pl-6">
+                        <span className="text-xs text-zinc-500">{node.type}</span>
+                        <span className="text-[10px] bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400 font-mono">
+                          via {node.via_relation}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {Object.entries(
+              impactData.affected.indirect.reduce((acc, node) => {
+                const d = node.depth || 2;
+                if (!acc[d]) acc[d] = [];
+                acc[d].push(node);
+                return acc;
+              }, {} as Record<number, AffectedNode[]>)
+            ).map(([depth, nodes]) => (
               <div key={depth}>
                 <h4 className="text-xs font-semibold text-zinc-500 mb-2">
-                  Depth {depth} {Number(depth) === 1 ? '(Direct)' : '(Indirect)'}
+                  Indirect Impact (Depth {depth})
                 </h4>
                 <ul className="space-y-2">
                   {nodes.map(node => (
                     <li 
                       key={node.id}
                       className="flex flex-col gap-1 p-2 rounded bg-zinc-950/50 hover:bg-zinc-800/80 cursor-pointer border border-zinc-800/50"
-                      onClick={() => dispatch(setSelectedNodeId(node.id))}
+                      onClick={() => {
+                        dispatch(setSelectedNodeId(node.id));
+                        dispatch(setZoomToNodeId(node.id));
+                      }}
                     >
                       <div className="flex items-center gap-2">
                         {getNodeIcon(node.type)}

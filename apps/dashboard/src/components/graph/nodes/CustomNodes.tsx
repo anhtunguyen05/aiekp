@@ -19,11 +19,27 @@ export interface CustomNodeData extends Record<string, unknown> {
   isExpandable?: boolean; // determined if there are edges connecting out to children
 }
 
-const BaseNode = ({ selected, children, colorClass }: { data: CustomNodeData, selected: boolean, children: React.ReactNode, colorClass: string }) => {
+const BaseNode = ({ selected, children, colorClass, id }: { data: CustomNodeData, selected: boolean, children: React.ReactNode, colorClass: string, id: string }) => {
+  const highlightedNodeIds = useSelector((state: RootState) => state.graph.highlightedNodeIds);
+  const violationNodeIds = useSelector((state: RootState) => state.graph.violationNodeIds);
+  const isImpact = highlightedNodeIds.includes(id);
+  const hasImpact = highlightedNodeIds.length > 0;
+  const isViolation = violationNodeIds.includes(id);
+
+  // Ring priority: selected > violation (red) > impact (orange) > normal
+  const ringClass = selected
+    ? `ring-2 ring-offset-2 ring-offset-zinc-950 ${colorClass}`
+    : isViolation
+    ? 'ring-2 ring-offset-2 ring-offset-zinc-950 ring-red-500 scale-[1.02]'
+    : isImpact
+    ? 'ring-2 ring-offset-2 ring-offset-zinc-950 ring-orange-400 scale-[1.02]'
+    : 'hover:-translate-y-[2px]';
+
   return (
     <div className={`relative px-4 py-3 rounded-2xl min-w-[200px] max-w-[280px] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
       ${glassClasses}
-      ${selected ? `ring-2 ring-offset-2 ring-offset-zinc-950 ${colorClass}` : 'hover:-translate-y-[2px]'}
+      ${ringClass}
+      ${!isImpact && !isViolation && hasImpact ? 'opacity-30' : 'opacity-100'}
     `}>
       <Handle type="target" position={Position.Top} className="opacity-0" />
       {children}
@@ -37,7 +53,7 @@ export const FileNode = ({ data, selected, id }: NodeProps<RFNode<CustomNodeData
   const isExpanded = useSelector((state: RootState) => state.graph.expandedNodeIds.includes(id));
   
   return (
-    <BaseNode data={data} selected={!!selected} colorClass="ring-blue-500">
+    <BaseNode data={data} selected={!!selected} colorClass="ring-blue-500" id={id}>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 overflow-hidden">
           <div className="p-2 rounded-xl bg-blue-500/20 text-blue-400 shrink-0">
@@ -67,7 +83,7 @@ export const ClassNode = ({ data, selected, id }: NodeProps<RFNode<CustomNodeDat
   const isExpanded = useSelector((state: RootState) => state.graph.expandedNodeIds.includes(id));
 
   return (
-    <BaseNode data={data} selected={!!selected} colorClass="ring-purple-500">
+    <BaseNode data={data} selected={!!selected} colorClass="ring-purple-500" id={id}>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 overflow-hidden">
           <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400 shrink-0">
@@ -92,9 +108,9 @@ export const ClassNode = ({ data, selected, id }: NodeProps<RFNode<CustomNodeDat
   );
 };
 
-export const FunctionNode = ({ data, selected }: NodeProps<RFNode<CustomNodeData>>) => {
+export const FunctionNode = ({ data, selected, id }: NodeProps<RFNode<CustomNodeData>>) => {
   return (
-    <BaseNode data={data} selected={!!selected} colorClass="ring-emerald-500">
+    <BaseNode data={data} selected={!!selected} colorClass="ring-emerald-500" id={id}>
       <div className="flex items-center gap-3 overflow-hidden">
         <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
           <FnIcon size={20} weight="duotone" />
@@ -108,9 +124,9 @@ export const FunctionNode = ({ data, selected }: NodeProps<RFNode<CustomNodeData
   );
 };
 
-export const DefaultNode = ({ data, selected }: NodeProps<RFNode<CustomNodeData>>) => {
+export const DefaultNode = ({ data, selected, id }: NodeProps<RFNode<CustomNodeData>>) => {
   return (
-    <BaseNode data={data} selected={!!selected} colorClass="ring-zinc-500">
+    <BaseNode data={data} selected={!!selected} colorClass="ring-zinc-400" id={id}>
       <div className="flex items-center gap-3 overflow-hidden">
         <div className="p-2 rounded-xl bg-zinc-700/50 text-zinc-400 shrink-0">
           <File size={20} weight="duotone" />
@@ -129,7 +145,7 @@ export const DirectoryNode = ({ data, selected, id }: NodeProps<RFNode<CustomNod
   const isExpanded = useSelector((state: RootState) => state.graph.expandedNodeIds.includes(id));
 
   return (
-    <BaseNode data={data} selected={!!selected} colorClass="ring-amber-500">
+    <BaseNode data={data} selected={!!selected} colorClass="ring-amber-500" id={id}>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 overflow-hidden">
           <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">

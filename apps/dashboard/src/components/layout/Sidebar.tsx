@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Search, MessageSquare, FolderGit2 } from 'lucide-react';
+import { Search, MessageSquare, FolderGit2, ShieldAlert, FileText } from 'lucide-react';
 
 export function Sidebar() {
   return (
@@ -26,6 +26,18 @@ export function Sidebar() {
             <Link href="/repositories" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-800 transition-colors text-sm">
               <FolderGit2 size={18} />
               <span>Repositories</span>
+            </Link>
+          </li>
+          <li>
+            <Link href="/rules" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-800 transition-colors text-sm">
+              <ShieldAlert size={18} />
+              <span>Rules Engine</span>
+            </Link>
+          </li>
+          <li>
+            <Link href="/docs" className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-zinc-800 transition-colors text-sm">
+              <FileText size={18} />
+              <span>Docs Generator</span>
             </Link>
           </li>
         </ul>

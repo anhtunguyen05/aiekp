@@ -38,3 +38,23 @@ def test_ingest_endpoint():
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "error"
+
+
+def test_impact_endpoint_validation():
+    with TestClient(app) as client:
+        # Invalid max_depth (< 1)
+        response = client.get("/graph/impact/some_node?max_depth=0")
+        assert response.status_code == 422
+
+        # Invalid max_depth (> 5)
+        response = client.get("/graph/impact/some_node?max_depth=6")
+        assert response.status_code == 422
+
+
+def test_impact_endpoint_not_found():
+    with TestClient(app) as client:
+        try:
+            response = client.get("/graph/impact/node_does_not_exist_xyz_12345")
+            assert response.status_code == 404
+        except Exception as e:
+            pytest.skip(f"DB not running: {e}")

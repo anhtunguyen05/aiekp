@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { ApiNode, ApiEdge } from '@/lib/graph-utils';
-import { ImpactAnalysisResponse } from '@/lib/api-types';
+import { ImpactAnalysisResponse, RuleDefinition, RuleCheckResponse } from '@/lib/api-types';
 
 interface NodesResponse {
   nodes: ApiNode[];
@@ -40,6 +40,13 @@ export const aiekpApi = createApi({
       query: () => '/stats',
       providesTags: ['Stats']
     }),
+    checkRules: builder.mutation<RuleCheckResponse, RuleDefinition[]>({
+      query: (rules) => ({
+        url: '/rules/check',
+        method: 'POST',
+        body: rules,
+      }),
+    }),
   }),
 })
 
@@ -49,4 +56,5 @@ export const {
   useGetNodeByIdQuery,
   useGetImpactQuery,
   useGetStatsQuery,
+  useCheckRulesMutation,
 } = aiekpApi

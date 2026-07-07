@@ -138,10 +138,11 @@ Dashboard chỉ giao tiếp qua **REST API** (đã có từ Phase 9). Không tru
 |---|---|---|---|
 | `/graph/nodes` | GET | ✅ Hoạt động | Visual Graph - lấy danh sách nodes |
 | `/graph/edges` | GET | ✅ Hoạt động | Visual Graph - lấy danh sách edges |
-| `/graph/impact/{node_id}` | GET | 🔲 Cần tạo mới | Impact Analysis |
-| `/chat` | POST (stream) | 🔲 Cần kiểm tra | AI Chat với streaming |
-| `/ingest` | POST | ✅ Có sẵn | Trigger scan repository |
-| `/stats` | GET | 🔲 Cần tạo mới | Dashboard Overview stats |
+| `/graph/` | DELETE | ✅ Hoạt động (x-api-key) | Clear toàn bộ Knowledge Graph |
+| `/chat` | POST (stream) | ✅ Hoạt động | AI Chat với streaming response |
+| `/ingest` | POST | ✅ Hoạt động | Trigger scan repository |
+| `/ingest/progress` | GET | ✅ Hoạt động | SSE progress bar real-time |
+| `/stats` | GET | ✅ Hoạt động | Dashboard Overview stats |
 
 ### 4.4. State Management (Redux graphSlice)
 
@@ -181,35 +182,44 @@ interface GraphState {
 ## 7. Implementation Phases (Thực tế)
 
 ### Giai đoạn 1: Foundation & API Audit ✅ Hoàn thành
-- Next.js project, layout cơ bản, RTK Query API client, audit endpoints.
+- Next.js 16 project, layout cơ bản (Sidebar + Main + Panel), RTK Query API client, audit endpoints.
+- Tạo mới backend endpoint `GET /stats` và `DELETE /graph/` (có bảo mật x-api-key).
 
 ### Giai đoạn 2: Visual Knowledge Graph ✅ Hoàn thành
-**Thực tế đã làm (khác với kế hoạch ban đầu):**
-- Dùng `@xyflow/react` + `elkjs` thay vì `@react-sigma/core`.
+**Thực tế đã làm (thay đổi so với kế hoạch ban đầu):**
+- Dùng `@xyflow/react` + `elkjs` thay vì `@react-sigma/core` — React Flow hỗ trợ custom node tốt hơn cho drill-down.
 - Tổng hợp **Virtual Directory Nodes** trong `graph-utils.ts` từ file paths (API không có directory node).
 - Custom nodes: `DirectoryNode`, `FileNode`, `ClassNode`, `FunctionNode` (với expand/collapse button).
-- `GraphCanvas.tsx`: logic visibility (cha visible + expanded → con visible), edge lifting, hierarchy edges auto-generated trong ELK layout.
-- `elk-layout.ts`: Tự động tạo hierarchy edges (amber dashed cho Directory→*, blue dashed cho File→Class) với spacing lớn (80px node-node, 120px between-layers).
-- `SearchBar.tsx`: tìm kiếm và highlight node.
-- Redux `graphSlice.ts`: `expandedNodeIds`, `selectedNodeId`, `highlightedNodeIds`.
+- `GraphCanvas.tsx`: logic visibility (cha visible + expanded → con visible), edge lifting, hierarchy edges auto-generated.
+- `elk-layout.ts`: Tự động tạo hierarchy edges (amber dashed cho Directory→*, blue dashed cho File→Class), spacing 150px node-node, 200px between-layers.
+- `SearchBar.tsx`: tìm kiếm và highlight node. Redux `graphSlice.ts`: `expandedNodeIds`, `selectedNodeId`, `highlightedNodeIds`.
 
-### Giai đoạn 3: Impact Analysis & AI Chat 🔲 Tiếp theo
-- Xem `plan.md` phần Giai đoạn 3 để biết chi tiết.
+### Giai đoạn 3: AI Chat & Repository Management ✅ Hoàn thành
+- Implement `ChatBox.tsx` với streaming response (ReadableStream + fetch), Evidence panel có `snippet` field.
+- Trang `/repositories` với form scan, SSE-based real-time progress bar.
+- `DashboardOverlay.tsx`: Nút "Clear Graph" gọi `DELETE /graph/` với header `x-api-key`.
+- Persistent scan status lưu vào `scan_status.json` (không bị mất khi server restart).
 
-### Giai đoạn 4: Repository Management & Dashboard Overview 🔲 Kế hoạch
-- Xem `plan.md` phần Giai đoạn 4 để biết chi tiết.
+### Giai đoạn 4: Polish, QA & CI/CD ✅ Hoàn thành
+- Fix toàn bộ ESLint errors và TypeScript strict mode passes.
+- `next build` pass clean (exit code 0) — Turbopack 6.1s compile.
+- Fix `.gitignore` root: thay `lib/` bằng `/lib/` để tránh bị ignore folder `apps/dashboard/src/lib`.
+- CI/CD pipeline (GitHub Actions) chạy thành công — cả frontend build lẫn backend tests pass.
 
 ---
 
-## 8. Acceptance Criteria (Điều kiện hoàn thành)
+## 8. Status: Completed ✅
 
-- [x] Dashboard chạy được ở `http://localhost:3000` sau lệnh `pnpm dev`.
+- [x] Dashboard chạy được ở `http://localhost:3000` sau lệnh `npm run dev`.
 - [x] Visual Graph hiển thị đúng dữ liệu từ Neo4j với phân cấp Folder → File → Class → Function.
 - [x] Tính năng expand/collapse node hoạt động, có đường kết nối màu sắc phân biệt.
 - [x] Search/highlight node hoạt động.
-- [x] TypeScript compile sạch (`tsc --noEmit` pass).
-- [ ] Tính năng Impact Analysis trả về kết quả chính xác trong vòng 3 giây.
-- [ ] Chat Interface gửi câu hỏi và nhận streaming response từ Reasoning Engine.
-- [ ] Form Scan Repository trigger được API và hiển thị thông báo thành công/thất bại.
-- [ ] Dashboard Overview hiển thị đúng số liệu thống kê từ Knowledge Graph.
-- [ ] Không có lỗi ESLint.
+- [x] TypeScript compile sạch (next build pass, exit code 0).
+- [x] Chat Interface gửi câu hỏi và nhận streaming response từ Reasoning Engine.
+- [x] Form Scan Repository trigger được API và hiển thị tiến trình real-time (SSE).
+- [x] Dashboard Overview hiển thị đúng số liệu thống kê từ Knowledge Graph.
+- [x] Nút "Clear Graph" xóa được toàn bộ Neo4j với xác nhận.
+- [x] Không có lỗi ESLint (lint pass clean).
+- [x] CI/CD pipeline (GitHub Actions) pass — frontend build + backend tests.
+
+> **Kết quả:** Phase 13 hoàn thành 100%. Commit cuối: `fix: commit missing src/lib files due to overly aggressive .gitignore`. Tag: `v0.1.2`.

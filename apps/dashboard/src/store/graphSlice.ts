@@ -5,6 +5,8 @@ interface GraphState {
   highlightedNodeIds: string[];
   searchQuery: string;
   expandedNodeIds: string[];
+  zoomToNodeId: string | null;
+  violationNodeIds: string[];  // Rule Engine: nodes with architecture violations
 }
 
 const initialState: GraphState = {
@@ -12,6 +14,8 @@ const initialState: GraphState = {
   highlightedNodeIds: [],
   searchQuery: '',
   expandedNodeIds: [],
+  zoomToNodeId: null,
+  violationNodeIds: [],
 }
 
 export const graphSlice = createSlice({
@@ -44,10 +48,19 @@ export const graphSlice = createSlice({
     clearSelection: (state) => {
       state.selectedNodeId = null;
       state.highlightedNodeIds = [];
-    }
+    },
+    setZoomToNodeId: (state, action: PayloadAction<string | null>) => {
+      state.zoomToNodeId = action.payload;
+    },
+    setViolationNodeIds: (state, action: PayloadAction<string[]>) => {
+      state.violationNodeIds = action.payload;
+    },
+    clearViolations: (state) => {
+      state.violationNodeIds = [];
+    },
   },
 })
 
-export const { setSelectedNodeId, setHighlightedNodeIds, setSearchQuery, toggleExpandedNodeId, expandNodes, clearSelection } = graphSlice.actions
+export const { setSelectedNodeId, setHighlightedNodeIds, setSearchQuery, toggleExpandedNodeId, expandNodes, clearSelection, setZoomToNodeId, setViolationNodeIds, clearViolations } = graphSlice.actions
 
 export default graphSlice.reducer

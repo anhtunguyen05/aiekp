@@ -1,6 +1,6 @@
 # Implementation Roadmap & Phases
 
-This document provides a high-level summary of all 11 phases (Phase 0 to Phase 10) of the AI Engineering Knowledge Platform (AIEKP).
+This document provides a high-level summary of all phases of the AI Engineering Knowledge Platform (AIEKP).
 
 > **Context-Driven Development (CDD) Principle:** 
 > We only maintain the high-level summary here. The detailed technical specification for each phase will be documented in its respective `docs/conductor/tracks/phase-X-*/spec.md` file *only when we are ready to begin implementation for that phase*. This prevents documentation rot and allows us to adapt to architectural learnings.
@@ -93,13 +93,14 @@ This document provides a high-level summary of all 11 phases (Phase 0 to Phase 1
 *   **Status**: Completed ✅
 
 ### Phase 13: Web Dashboard & Visual Knowledge Graph
-*   **Summary**: A Next.js/TypeScript dashboard with a React Flow + ELK.js powered hierarchical Knowledge Graph (Folder→File→Class→Function drill-down), Impact Analysis visualization, AI Chat interface with Evidence display, and Repository Management panel.
+*   **Summary**: A Next.js 16/TypeScript dashboard with a React Flow + ELK.js powered hierarchical Knowledge Graph (Folder→File→Class→Function drill-down), AI Chat interface with streaming + Evidence display, Repository scan management with SSE progress, and Dashboard Overview stats. Backend extended with `GET /stats` and `DELETE /graph/`.
 *   **Detailed Spec**: `tracks/phase-13-web-dashboard/spec.md`
-*   **Status**: In Progress 🚧 (Giai đoạn 2/4 hoàn thành)
+*   **Status**: Completed ✅ (Tag: v0.1.2)
 
 ### Phase 14: Enterprise Intelligence Features
-*   **Summary**: Implement "Killer Features" such as System-wide Impact Analysis APIs, Custom Architectural Rule Engines, and Automated Onboarding Document Generation based on current codebase context.
-*   **Status**: Planned 🔮
+*   **Summary**: Build advanced intelligence capabilities on top of the Phase 13 Dashboard: (1) **Impact Analysis Engine** — `GET /graph/impact/{node_id}` BFS/DFS traversal + visual highlight trên graph; (2) **Architectural Rule Engine** — define custom rules (no circular deps, max function complexity) và highlight violations trực tiếp trên Knowledge Graph; (3) **Automated Onboarding Doc Generator** — AI tự tạo tài liệu onboarding từ codebase context.
+*   **Detailed Spec**: `tracks/phase-14-enterprise-intelligence/spec.md`
+*   **Status**: Completed ✅
 
 ### Phase 15: Evaluation & RAG Fine-Tuning
 *   **Summary**: Implement telemetry (e.g., Ragas, TruLens) to measure answer accuracy. Use user feedback logs to fine-tune the Vector Database, prompts, and underlying LLMs.

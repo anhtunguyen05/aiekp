@@ -17,7 +17,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store';
-import { setSelectedNodeId, clearSelection, expandNodes } from '@/store/graphSlice';
+import { setSelectedNodeId, clearSelection, expandNodes, setZoomToNodeId } from '@/store/graphSlice';
 import { FileNode, ClassNode, FunctionNode, DefaultNode, DirectoryNode } from './nodes/CustomNodes';
 import { computeElkLayout } from '@/lib/elk-layout';
 
@@ -45,6 +45,7 @@ function FlowCanvas({ initialNodes, initialEdges }: GraphCanvasProps) {
   const selectedNodeId = useSelector((state: RootState) => state.graph.selectedNodeId);
   const highlightedNodeIds = useSelector((state: RootState) => state.graph.highlightedNodeIds);
   const searchQuery = useSelector((state: RootState) => state.graph.searchQuery);
+  const zoomToNodeId = useSelector((state: RootState) => state.graph.zoomToNodeId);
 
   useEffect(() => {
     const computeLayout = async () => {
@@ -144,6 +145,16 @@ function FlowCanvas({ initialNodes, initialEdges }: GraphCanvasProps) {
 
     computeLayout();
   }, [initialNodes, initialEdges, expandedNodeIds, setNodes, setEdges, fitView]);
+
+  // ─────────────────────────────────────────────
+  // Zoom to node effect
+  // ─────────────────────────────────────────────
+  useEffect(() => {
+    if (zoomToNodeId) {
+      fitView({ nodes: [{ id: zoomToNodeId }], duration: 600, padding: 0.3 });
+      dispatch(setZoomToNodeId(null));
+    }
+  }, [zoomToNodeId, fitView, dispatch]);
 
   // ─────────────────────────────────────────────
   // Highlight / search opacity effects
