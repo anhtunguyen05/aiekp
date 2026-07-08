@@ -67,6 +67,18 @@ For the best experience, install the VSCode extension.
 4. Choose `aiekp-1.0.0.vsix`.
 5. Open the AIEKP Chat panel from the activity bar!
 
+### 6. Evaluation & Fine-Tuning (Phase 15+)
+
+AIEKP tracks all reasoning traces and user feedback (Thumbs Up/Down) into a local `telemetry.db` SQLite database. You can evaluate the RAG pipeline's performance using Ragas or export the data for fine-tuning your own models.
+
+```bash
+# Run automated RAGAS evaluation on recent traces
+aiekp eval run
+
+# Export positive feedback traces to JSONL for OpenAI fine-tuning
+aiekp eval export-jsonl
+```
+
 ## Architecture
 
 This monorepo contains:

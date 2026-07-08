@@ -16,6 +16,13 @@ console = Console()
 config_app = typer.Typer(help="Manage AIEKP global configuration")
 app.add_typer(config_app, name="config")
 
+try:
+    from aiekp_cli.commands.eval import eval_app
+
+    app.add_typer(eval_app, name="eval")
+except ImportError:
+    pass
+
 
 @config_app.command("set")
 def config_set(key: str, value: str):
