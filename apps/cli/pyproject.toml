@@ -1,6 +1,6 @@
 [project]
 name = "aiekp-cli"
-version = "0.1.2"
+dynamic = ["version"]
 description = "Command Line Interface for AIEKP (AI Engineering Knowledge Platform)"
 readme = "README.md"
 authors = [
@@ -26,5 +26,8 @@ dependencies = [
 aiekp = "aiekp_cli.main:app"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
