@@ -18,6 +18,7 @@ app.add_typer(config_app, name="config")
 
 try:
     from aiekp_cli.commands.eval import eval_app
+
     app.add_typer(eval_app, name="eval")
 except ImportError:
     pass

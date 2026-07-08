@@ -45,6 +45,7 @@ from src.graphql_api.schema import schema  # noqa: E402
 async def lifespan(app: FastAPI):
     # Initialize Neo4j, Qdrant, etc.
     from src.telemetry.database import init_db
+
     init_db()
     await init_dependencies()
     yield

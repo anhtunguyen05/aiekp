@@ -5,21 +5,18 @@ from src.telemetry.models import Feedback
 
 router = APIRouter(prefix="/feedback", tags=["Feedback"])
 
+
 class FeedbackRequest(BaseModel):
     trace_id: str
     score: int
     comment: str = None
 
+
 @router.post("/")
-async def submit_feedback(
-    request: FeedbackRequest,
-    db = Depends(get_telemetry_db)
-):
+async def submit_feedback(request: FeedbackRequest, db=Depends(get_telemetry_db)):
     try:
         feedback = Feedback(
-            trace_id=request.trace_id,
-            score=request.score,
-            comment=request.comment
+            trace_id=request.trace_id, score=request.score, comment=request.comment
         )
         db.add(feedback)
         db.commit()

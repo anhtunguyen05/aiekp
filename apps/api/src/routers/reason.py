@@ -27,7 +27,7 @@ async def process_reasoning(
     try:
         with tracer.span("process_query"):
             result = await reasoning_service.process_query(request)
-        
+
         # We can add metadata like sources used
         tracer.metadata["sources_used"] = result.sources_used
         return result
@@ -40,9 +40,9 @@ async def process_reasoning(
 
 @router.post("/stream")
 async def reason_stream(
-    request: ReasoningRequest, 
+    request: ReasoningRequest,
     background_tasks: BackgroundTasks,
-    reasoning_service=Depends(get_reasoning_service)
+    reasoning_service=Depends(get_reasoning_service),
 ):
     """
     Process a natural language query and stream the response using Server-Sent Events (SSE).
@@ -53,7 +53,7 @@ async def reason_stream(
     async def sse_generator():
         # Yield the trace ID immediately so the frontend can associate feedback
         yield f"data: {json.dumps({'type': 'trace', 'trace_id': tracer.trace_id})}\n\n"
-        
+
         try:
             full_answer = ""
             with tracer.span("stream_process_query"):
@@ -73,6 +73,8 @@ async def reason_stream(
             yield f"data: {json.dumps({'type': 'error', 'content': str(e)})}\n\n"
         finally:
             yield "data: [DONE]\n\n"
-            save_trace(tracer) # We call it here because BackgroundTasks don't work reliably with StreamingResponse completion in all ASGI servers, so we just run it directly at the end of the stream.
+            save_trace(
+                tracer
+            )  # We call it here because BackgroundTasks don't work reliably with StreamingResponse completion in all ASGI servers, so we just run it directly at the end of the stream.
 
     return StreamingResponse(sse_generator(), media_type="text/event-stream")
