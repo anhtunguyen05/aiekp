@@ -65,7 +65,7 @@ def run_eval():
             if row["metadata"]:
                 try:
                     meta = json.loads(row["metadata"])
-                except:
+                except Exception:
                     pass
             
             # These are placeholder extractions, depends on actual metadata structure
@@ -122,7 +122,7 @@ def export_jsonl(output: str = "finetune_data.jsonl"):
                 if row["metadata"]:
                     try:
                         meta = json.loads(row["metadata"])
-                    except:
+                    except Exception:
                         pass
                 
                 # Format for OpenAI fine-tuning (messages format)
