@@ -35,6 +35,7 @@ from src.routers import (
     stats,
     rules,
     docs,
+    feedback,
 )  # noqa: E402
 from src.config import settings  # noqa: E402
 from src.graphql_api.schema import schema  # noqa: E402
@@ -43,6 +44,8 @@ from src.graphql_api.schema import schema  # noqa: E402
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize Neo4j, Qdrant, etc.
+    from src.telemetry.database import init_db
+    init_db()
     await init_dependencies()
     yield
     # Cleanup connections
@@ -77,6 +80,7 @@ app.include_router(reason.router, dependencies=protected_dependencies)
 app.include_router(stats.router, dependencies=protected_dependencies)
 app.include_router(rules.router, dependencies=protected_dependencies)
 app.include_router(docs.router, dependencies=protected_dependencies)
+app.include_router(feedback.router, dependencies=protected_dependencies)
 
 graphql_app = GraphQLRouter(schema)
 app.include_router(graphql_app, prefix="/graphql", dependencies=protected_dependencies)

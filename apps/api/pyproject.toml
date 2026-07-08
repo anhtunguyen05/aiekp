@@ -26,6 +26,7 @@ dependencies = [
     "reasoning-engine",
     "strawberry-graphql[fastapi]>=0.320.0",
     "graphql-core<3.3.0",
+    "sqlalchemy>=2.0.51",
 ]
 
 [build-system]

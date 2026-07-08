@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles } from 'lucide-react';
+import { Send, Bot, User, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { EvidencePanel } from './EvidencePanel';
 import { AffectedNode } from '@/lib/api-types'; // Reuse type for sources
 
@@ -9,6 +9,8 @@ interface ChatMessage {
   content: string;
   sources?: AffectedNode[];
   isStreaming?: boolean;
+  traceId?: string;
+  feedback?: number;
 }
 
 const SUGGESTED_QUESTIONS = [
@@ -31,6 +33,21 @@ export function ChatBox() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const handleFeedback = async (messageId: string, traceId: string, score: number) => {
+    // Optimistic update
+    setMessages(prev => prev.map(m => m.id === messageId ? { ...m, feedback: score } : m));
+    
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/feedback/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trace_id: traceId, score })
+      });
+    } catch (error) {
+      console.error("Failed to submit feedback", error);
+    }
+  };
 
   const handleSubmit = async (text: string = input) => {
     if (!text.trim() || isLoading) return;
@@ -95,6 +112,15 @@ export function ChatBox() {
                     depth: 1,
                     via_relation: 'CONTEXT'
                   }));
+                } else if (parsed.type === 'trace') {
+                  const traceId = parsed.trace_id;
+                  setMessages((prev) => 
+                    prev.map((m) => 
+                      m.id === assistantMessageId 
+                        ? { ...m, traceId } 
+                        : m
+                    )
+                  );
                 }
                 
                 const nextContent = currentContent;
@@ -195,6 +221,25 @@ export function ChatBox() {
                 {msg.role === 'assistant' && msg.sources && msg.sources.length > 0 && (
                   <div className="w-full mt-2">
                     <EvidencePanel sources={msg.sources} />
+                  </div>
+                )}
+                
+                {msg.role === 'assistant' && !msg.isStreaming && msg.traceId && (
+                  <div className="flex gap-2 mt-2 ml-1">
+                    <button 
+                      onClick={() => handleFeedback(msg.id, msg.traceId!, 1)}
+                      className={`p-1.5 rounded-md hover:bg-zinc-800 transition-colors ${msg.feedback === 1 ? 'text-green-400 bg-green-400/10' : 'text-zinc-500'}`}
+                      title="Good response"
+                    >
+                      <ThumbsUp size={14} />
+                    </button>
+                    <button 
+                      onClick={() => handleFeedback(msg.id, msg.traceId!, -1)}
+                      className={`p-1.5 rounded-md hover:bg-zinc-800 transition-colors ${msg.feedback === -1 ? 'text-red-400 bg-red-400/10' : 'text-zinc-500'}`}
+                      title="Bad response"
+                    >
+                      <ThumbsDown size={14} />
+                    </button>
                   </div>
                 )}
               </div>
