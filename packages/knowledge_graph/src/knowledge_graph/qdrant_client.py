@@ -1,6 +1,13 @@
 from typing import List, Dict, Any
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct, Filter, FieldCondition, MatchValue
+from qdrant_client.models import (
+    Distance,
+    VectorParams,
+    PointStruct,
+    Filter,
+    FieldCondition,
+    MatchValue,
+)
 import uuid
 
 
@@ -39,7 +46,7 @@ class QdrantVectorManager:
         for vector, payload in zip(vectors, payloads):
             # Inject tenant_id into payload
             payload["tenant_id"] = tenant_id
-            
+
             point_id = str(
                 uuid.uuid5(uuid.NAMESPACE_DNS, payload.get("id", str(uuid.uuid4())))
             )
@@ -59,9 +66,7 @@ class QdrantVectorManager:
         Search for nearest vectors in Qdrant for a specific tenant.
         """
         tenant_filter = Filter(
-            must=[
-                FieldCondition(key="tenant_id", match=MatchValue(value=tenant_id))
-            ]
+            must=[FieldCondition(key="tenant_id", match=MatchValue(value=tenant_id))]
         )
         return self.client.query_points(
             collection_name=collection_name,

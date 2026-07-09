@@ -23,13 +23,17 @@ from src.auth import models, utils
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
+
 class CurrentUser:
     def __init__(self, email: str, tenant_id: str, role: str):
         self.email = email
         self.tenant_id = tenant_id
         self.role = role
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_auth_db)) -> CurrentUser:
+
+def get_current_user(
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_auth_db)
+) -> CurrentUser:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -44,11 +48,11 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             raise credentials_exception
     except jwt.PyJWTError:
         raise credentials_exception
-        
+
     user = db.query(models.User).filter(models.User.email == email).first()
     if user is None:
         raise credentials_exception
-        
+
     return CurrentUser(email=user.email, tenant_id=tenant_id, role=role)
 
 
@@ -118,8 +122,6 @@ def get_ingestor() -> GraphIngestor:
     return _ingestor
 
 
-
-
 # --- Context Engine Dependencies ---
 
 
@@ -130,7 +132,9 @@ def get_context_service(request: Request) -> IContextService:
         token = auth_header.split(" ")[1]
 
     intent_adapter = KeywordIntentAdapter()
-    knowledge_client = HttpKnowledgeEngineAdapter(base_url="http://localhost:8000", token=token)
+    knowledge_client = HttpKnowledgeEngineAdapter(
+        base_url="http://localhost:8000", token=token
+    )
     return ContextService(
         intent_analyzer=intent_adapter, knowledge_client=knowledge_client
     )
@@ -145,7 +149,9 @@ def get_reasoning_service(request: Request) -> IReasoningService:
     if auth_header and auth_header.startswith("Bearer "):
         token = auth_header.split(" ")[1]
 
-    context_fetcher = ContextEngineHttpAdapter(base_url="http://localhost:8000", token=token)
+    context_fetcher = ContextEngineHttpAdapter(
+        base_url="http://localhost:8000", token=token
+    )
     llm_generator = LangChainLLMAdapter(model_name="gemini-3.5-flash", temperature=0.0)
     return ReasoningService(
         context_fetcher=context_fetcher, llm_generator=llm_generator

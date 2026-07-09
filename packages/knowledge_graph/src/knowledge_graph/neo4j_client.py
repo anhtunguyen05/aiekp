@@ -24,7 +24,10 @@ class Neo4jGraphManager:
         Deletes nodes and relationships for a specific tenant, or all if tenant_id is None.
         """
         if tenant_id:
-            self._execute_query("MATCH (n {tenant_id: $tenant_id}) DETACH DELETE n", {"tenant_id": tenant_id})
+            self._execute_query(
+                "MATCH (n {tenant_id: $tenant_id}) DETACH DELETE n",
+                {"tenant_id": tenant_id},
+            )
         else:
             self._execute_query("MATCH (n) DETACH DELETE n")
 
@@ -39,7 +42,12 @@ class Neo4jGraphManager:
         RETURN f
         """
         self._execute_query(
-            file_query, {"file_path": metadata.file_path, "language": metadata.language, "tenant_id": tenant_id}
+            file_query,
+            {
+                "file_path": metadata.file_path,
+                "language": metadata.language,
+                "tenant_id": tenant_id,
+            },
         )
 
         # 2. Merge Standalone Functions and link to File

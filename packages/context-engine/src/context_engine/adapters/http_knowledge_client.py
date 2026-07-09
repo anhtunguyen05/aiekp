@@ -9,7 +9,9 @@ class HttpKnowledgeEngineAdapter(IKnowledgeEngineClient):
     Adapter that communicates with the Phase 5 FastAPI Knowledge Engine over HTTP.
     """
 
-    def __init__(self, base_url: str = "http://localhost:8000", token: Optional[str] = None):
+    def __init__(
+        self, base_url: str = "http://localhost:8000", token: Optional[str] = None
+    ):
         self.base_url = base_url.rstrip("/")
         self.token = token
 
@@ -19,7 +21,9 @@ class HttpKnowledgeEngineAdapter(IKnowledgeEngineClient):
             headers["Authorization"] = f"Bearer {self.token}"
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{self.base_url}/search/", json={"query": query, "top_k": top_k}, headers=headers
+                f"{self.base_url}/search/",
+                json={"query": query, "top_k": top_k},
+                headers=headers,
             )
             response.raise_for_status()
             data = response.json()
@@ -37,7 +41,9 @@ class HttpKnowledgeEngineAdapter(IKnowledgeEngineClient):
 
             encoded_id = urllib.parse.quote(node_id, safe="")
 
-            response = await client.get(f"{self.base_url}/graph/nodes/{encoded_id}", headers=headers)
+            response = await client.get(
+                f"{self.base_url}/graph/nodes/{encoded_id}", headers=headers
+            )
 
             if response.status_code == 404:
                 return EvidenceNode(

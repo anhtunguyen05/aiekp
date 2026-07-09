@@ -147,7 +147,9 @@ async def trigger_ingestion(
     }
     save_status(scan_status)
 
-    background_tasks.add_task(process_repository, repo_path, ingestor, current_user.tenant_id)
+    background_tasks.add_task(
+        process_repository, repo_path, ingestor, current_user.tenant_id
+    )
     return IngestResponse(
         status="accepted",
         message=f"Ingestion started for {repo_path} in the background.",

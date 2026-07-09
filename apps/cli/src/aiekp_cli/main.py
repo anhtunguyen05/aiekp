@@ -35,7 +35,10 @@ def get_auth_headers():
 
 
 @auth_app.command("login")
-def auth_login(email: str = typer.Option(..., prompt=True), password: str = typer.Option(..., prompt=True, hide_input=True)):
+def auth_login(
+    email: str = typer.Option(..., prompt=True),
+    password: str = typer.Option(..., prompt=True, hide_input=True),
+):
     """Login to AIEKP and save the authentication token."""
     with console.status("[bold blue]Logging in...[/bold blue]"):
         try:
@@ -53,7 +56,9 @@ def auth_login(email: str = typer.Option(..., prompt=True), password: str = type
             else:
                 console.print("[bold red]Error:[/bold red] No access token returned.")
         except httpx.ConnectError:
-            console.print(f"[bold red]Error:[/bold red] Could not connect to API at {API_URL}.")
+            console.print(
+                f"[bold red]Error:[/bold red] Could not connect to API at {API_URL}."
+            )
         except httpx.HTTPStatusError as e:
             console.print(f"[bold red]Login failed:[/bold red] {e.response.text}")
         except Exception as e:
@@ -63,9 +68,11 @@ def auth_login(email: str = typer.Option(..., prompt=True), password: str = type
 @auth_app.command("register")
 def auth_register(
     email: str = typer.Option(..., prompt=True),
-    password: str = typer.Option(..., prompt=True, hide_input=True, confirmation_prompt=True),
+    password: str = typer.Option(
+        ..., prompt=True, hide_input=True, confirmation_prompt=True
+    ),
     tenant_name: str = typer.Option(..., prompt="Tenant Name"),
-    tenant_description: str = typer.Option("", prompt="Tenant Description (Optional)")
+    tenant_description: str = typer.Option("", prompt="Tenant Description (Optional)"),
 ):
     """Register a new user and tenant in AIEKP."""
     with console.status("[bold blue]Registering account...[/bold blue]"):
@@ -76,24 +83,34 @@ def auth_register(
                     "email": email,
                     "password": password,
                     "tenant_name": tenant_name,
-                    "tenant_description": tenant_description
+                    "tenant_description": tenant_description,
                 },
                 timeout=10.0,
             )
-            
+
             if response.status_code == 400 and "already registered" in response.text:
-                console.print(f"[bold yellow]Email {email} is already registered.[/bold yellow]")
+                console.print(
+                    f"[bold yellow]Email {email} is already registered.[/bold yellow]"
+                )
                 return
-                
+
             response.raise_for_status()
             data = response.json()
-            console.print(f"[bold green]Successfully registered user {data.get('email')} under Tenant: {tenant_name}![/bold green]")
-            console.print("You can now login using: [bold cyan]aiekp auth login[/bold cyan]")
-            
+            console.print(
+                f"[bold green]Successfully registered user {data.get('email')} under Tenant: {tenant_name}![/bold green]"
+            )
+            console.print(
+                "You can now login using: [bold cyan]aiekp auth login[/bold cyan]"
+            )
+
         except httpx.ConnectError:
-            console.print(f"[bold red]Error:[/bold red] Could not connect to API at {API_URL}.")
+            console.print(
+                f"[bold red]Error:[/bold red] Could not connect to API at {API_URL}."
+            )
         except httpx.HTTPStatusError as e:
-            console.print(f"[bold red]Registration failed:[/bold red] {e.response.text}")
+            console.print(
+                f"[bold red]Registration failed:[/bold red] {e.response.text}"
+            )
         except Exception as e:
             console.print(f"[bold red]Unexpected error:[/bold red] {e}")
 
@@ -305,7 +322,10 @@ def ingest(path: str = typer.Argument(..., help="Path to the directory to ingest
     with console.status(f"[bold blue]Ingesting {abs_path}..."):
         try:
             response = httpx.post(
-                f"{API_URL}/ingest/", json={"repo_path": abs_path}, headers=get_auth_headers(), timeout=120.0
+                f"{API_URL}/ingest/",
+                json={"repo_path": abs_path},
+                headers=get_auth_headers(),
+                timeout=120.0,
             )
             response.raise_for_status()
             data = response.json()
@@ -344,7 +364,10 @@ def context(query: str = typer.Argument(..., help="Query to retrieve context for
     with console.status(f"[bold blue]Retrieving context for:[/bold blue] '{query}'..."):
         try:
             response = httpx.post(
-                f"{API_URL}/context/retrieve", json={"query": query}, headers=get_auth_headers(), timeout=30.0
+                f"{API_URL}/context/retrieve",
+                json={"query": query},
+                headers=get_auth_headers(),
+                timeout=30.0,
             )
             response.raise_for_status()
             data = response.json()
@@ -405,7 +428,11 @@ def reason(
 
         # Connect to stream endpoint
         with httpx.stream(
-            "POST", f"{API_URL}/reason/stream", json=payload, headers=get_auth_headers(), timeout=300.0
+            "POST",
+            f"{API_URL}/reason/stream",
+            json=payload,
+            headers=get_auth_headers(),
+            timeout=300.0,
         ) as response:
             response.raise_for_status()
             for line in response.iter_lines():

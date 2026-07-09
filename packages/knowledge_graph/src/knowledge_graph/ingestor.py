@@ -91,5 +91,8 @@ class GraphIngestor:
 
             # 4. Upsert to Qdrant
             self.qdrant.upsert_vectors(
-                collection_name="code_nodes", vectors=vectors, payloads=payloads, tenant_id=tenant_id
+                collection_name="code_nodes",
+                vectors=vectors,
+                payloads=payloads,
+                tenant_id=tenant_id,
             )
