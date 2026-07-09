@@ -40,3 +40,23 @@ def inject_config_to_env() -> None:
     for key, value in config.items():
         if key not in os.environ:
             os.environ[key] = str(value)
+
+
+AUTH_FILE = CONFIG_DIR / "auth.json"
+
+
+def read_auth_token() -> str:
+    if not AUTH_FILE.exists():
+        return ""
+    try:
+        with open(AUTH_FILE, "r") as f:
+            data = json.load(f)
+            return data.get("access_token", "")
+    except Exception:
+        return ""
+
+
+def write_auth_token(token: str) -> None:
+    _ensure_config_dir()
+    with open(AUTH_FILE, "w") as f:
+        json.dump({"access_token": token}, f, indent=4)

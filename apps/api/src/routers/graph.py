@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from knowledge_graph import Neo4jGraphManager
-from src.dependencies import get_neo4j_manager
+from src.dependencies import get_neo4j_manager, get_current_user, CurrentUser
 
 router = APIRouter(prefix="/graph", tags=["graph"])
 
@@ -8,14 +8,15 @@ router = APIRouter(prefix="/graph", tags=["graph"])
 @router.get("/nodes")
 async def get_all_nodes(
     limit: int = Query(10000, ge=1, le=50000),
+    current_user: CurrentUser = Depends(get_current_user),
     graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager),
 ):
     query = """
-    MATCH (n)
+    MATCH (n {tenant_id: $tenant_id})
     RETURN coalesce(n.id, n.path) as id, labels(n)[0] as type, properties(n) as properties
     LIMIT $limit
     """
-    records, _, _ = graph_manager.driver.execute_query(query, limit=limit)
+    records, _, _ = graph_manager.driver.execute_query(query, limit=limit, tenant_id=current_user.tenant_id)
 
     nodes = []
     for r in records:
@@ -26,14 +27,15 @@ async def get_all_nodes(
 @router.get("/edges")
 async def get_all_edges(
     limit: int = Query(10000, ge=1, le=50000),
+    current_user: CurrentUser = Depends(get_current_user),
     graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager),
 ):
     query = """
-    MATCH (n)-[r]->(m)
+    MATCH (n {tenant_id: $tenant_id})-[r]->(m {tenant_id: $tenant_id})
     RETURN coalesce(n.id, n.path) as source, coalesce(m.id, m.path) as target, type(r) as type, properties(r) as properties
     LIMIT $limit
     """
-    records, _, _ = graph_manager.driver.execute_query(query, limit=limit)
+    records, _, _ = graph_manager.driver.execute_query(query, limit=limit, tenant_id=current_user.tenant_id)
 
     edges = []
     for r in records:
@@ -50,7 +52,9 @@ async def get_all_edges(
 
 @router.get("/nodes/{node_id:path}")
 async def get_node_details(
-    node_id: str, graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager)
+    node_id: str, 
+    current_user: CurrentUser = Depends(get_current_user),
+    graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager)
 ):
     # We can retrieve node details and its relationships
     # This requires a custom Cypher query
@@ -58,13 +62,13 @@ async def get_node_details(
     node_id = node_id.replace("\\\\", "\\")
 
     query = """
-    MATCH (n)
+    MATCH (n {tenant_id: $tenant_id})
     WHERE coalesce(n.id, n.path) = $node_id
-    OPTIONAL MATCH (n)-[r]->(m)
+    OPTIONAL MATCH (n)-[r]->(m {tenant_id: $tenant_id})
     RETURN n, collect({type: type(r), target: coalesce(m.id, m.path), target_name: coalesce(m.name, m.path), target_type: labels(m)[0]}) as relationships
     """
 
-    records, summary, keys = graph_manager.driver.execute_query(query, node_id=node_id)
+    records, summary, keys = graph_manager.driver.execute_query(query, node_id=node_id, tenant_id=current_user.tenant_id)
 
     if not records:
         raise HTTPException(status_code=404, detail="Node not found")
@@ -84,6 +88,7 @@ async def get_impact_analysis(
     node_id: str,
     max_depth: int = Query(3, ge=1, le=5),
     rel_types: list[str] = Query(default=[]),
+    current_user: CurrentUser = Depends(get_current_user),
     graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager),
 ):
     """
@@ -93,9 +98,9 @@ async def get_impact_analysis(
     node_id = node_id.replace("\\\\", "\\")
 
     # First, verify the source node exists
-    check_query = "MATCH (n) WHERE coalesce(n.id, n.path) = $node_id RETURN coalesce(n.id, n.path) as id, coalesce(labels(n)[0], 'Unknown') as type, coalesce(n.name, n.path) as label"
+    check_query = "MATCH (n {tenant_id: $tenant_id}) WHERE coalesce(n.id, n.path) = $node_id RETURN coalesce(n.id, n.path) as id, coalesce(labels(n)[0], 'Unknown') as type, coalesce(n.name, n.path) as label"
     check_records, _, _ = graph_manager.driver.execute_query(
-        check_query, node_id=node_id
+        check_query, node_id=node_id, tenant_id=current_user.tenant_id
     )
     if not check_records:
         raise HTTPException(status_code=404, detail="Source node not found")
@@ -129,7 +134,7 @@ async def get_impact_analysis(
     # Trace along any relationship (undirected) to show general dependency impact
     # Use variable length path and return path length as depth
     query = f"""
-    MATCH p=(n)-{rel_query}-(m)
+    MATCH p=(n {{tenant_id: $tenant_id}})-{rel_query}-(m {{tenant_id: $tenant_id}})
     WHERE coalesce(n.id, n.path) = $node_id
     WITH m, n, p, length(p) as depth
     // Deduplicate by taking the shortest path (minimum depth)
@@ -146,7 +151,7 @@ async def get_impact_analysis(
         coalesce(n.name, n.path) as source_label
     ORDER BY depth
     """
-    records, _, _ = graph_manager.driver.execute_query(query, node_id=node_id)
+    records, _, _ = graph_manager.driver.execute_query(query, node_id=node_id, tenant_id=current_user.tenant_id)
 
     if not records:
         return {
@@ -178,12 +183,16 @@ async def get_impact_analysis(
 
 
 @router.delete("/")
-def clear_graph(graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager)):
+def clear_graph(
+    current_user: CurrentUser = Depends(get_current_user),
+    graph_manager: Neo4jGraphManager = Depends(get_neo4j_manager)
+):
     """
-    Clears the entire Knowledge Graph.
+    Clears the Knowledge Graph for the current tenant.
     """
     try:
-        graph_manager.clear_database()
-        return {"message": "Knowledge Graph cleared successfully."}
+        query = "MATCH (n {tenant_id: $tenant_id}) DETACH DELETE n"
+        graph_manager.driver.execute_query(query, tenant_id=current_user.tenant_id)
+        return {"message": "Knowledge Graph cleared successfully for the tenant."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

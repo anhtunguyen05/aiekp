@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
+from qdrant_client.models import Distance, VectorParams, PointStruct, Filter, FieldCondition, MatchValue
 import uuid
 
 
@@ -27,19 +27,19 @@ class QdrantVectorManager:
         collection_name: str,
         vectors: List[List[float]],
         payloads: List[Dict[str, Any]],
+        tenant_id: str,
     ):
         """
-        Upserts vectors and their associated metadata payloads into Qdrant.
+        Upserts vectors and their associated metadata payloads into Qdrant with tenant_id.
         """
         if not vectors or not payloads or len(vectors) != len(payloads):
             return
 
         points = []
         for vector, payload in zip(vectors, payloads):
-            # We use a UUID string derived from the payload id or a random one to avoid collision.
-            # Using MD5 of the unique ID can give a deterministic UUID, but for simplicity we generate uuid4
-            # if we don't do deterministic, upserts with same metadata will duplicate.
-            # So let's make it deterministic if `id` is in payload.
+            # Inject tenant_id into payload
+            payload["tenant_id"] = tenant_id
+            
             point_id = str(
                 uuid.uuid5(uuid.NAMESPACE_DNS, payload.get("id", str(uuid.uuid4())))
             )
@@ -52,13 +52,20 @@ class QdrantVectorManager:
         self,
         collection_name: str,
         query_vector: List[float],
+        tenant_id: str,
         limit: int = 10,
     ):
         """
-        Search for nearest vectors in Qdrant.
+        Search for nearest vectors in Qdrant for a specific tenant.
         """
+        tenant_filter = Filter(
+            must=[
+                FieldCondition(key="tenant_id", match=MatchValue(value=tenant_id))
+            ]
+        )
         return self.client.query_points(
             collection_name=collection_name,
             query=query_vector,
+            query_filter=tenant_filter,
             limit=limit,
         ).points

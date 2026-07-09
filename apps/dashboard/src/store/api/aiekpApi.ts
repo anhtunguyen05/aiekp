@@ -11,21 +11,38 @@ interface EdgesResponse {
   edges: ApiEdge[];
 }
 
-
 export const aiekpApi = createApi({
   reducerPath: 'aiekpApi',
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
-    prepareHeaders: (headers) => {
-      const apiKey = process.env.NEXT_PUBLIC_API_KEY;
-      if (apiKey) {
-        headers.set('X-API-Key', apiKey);
+    prepareHeaders: (headers, { getState }) => {
+      // Access auth token from Redux state
+      const token = (getState() as any).auth?.token;
+      
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
       }
       return headers;
     },
   }),
   tagTypes: ['Graph', 'Stats'],
   endpoints: (builder) => ({
+    login: builder.mutation<any, any>({
+      query: (credentials) => {
+        // We use application/x-www-form-urlencoded because OAuth2PasswordRequestForm expects form data
+        const formData = new URLSearchParams();
+        formData.append('username', credentials.username);
+        formData.append('password', credentials.password);
+        return {
+          url: '/auth/login',
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        };
+      },
+    }),
     getNodes: builder.query<NodesResponse, void>({ 
       query: () => '/graph/nodes',
       providesTags: ['Graph']
@@ -51,6 +68,7 @@ export const aiekpApi = createApi({
 })
 
 export const {
+  useLoginMutation,
   useGetNodesQuery,
   useGetEdgesQuery,
   useGetNodeByIdQuery,
