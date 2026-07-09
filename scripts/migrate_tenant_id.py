@@ -1,7 +1,6 @@
 import os
 from neo4j import GraphDatabase
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import Filter, FieldCondition, IsEmptyCondition, SetPayloadOperation
 from src.auth.database import SessionLocal
 from src.auth.crud import get_user_by_email
 

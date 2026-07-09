@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from datetime import timedelta
 from pydantic import BaseModel
 
-from src.auth import crud, models, utils
+from src.auth import crud, utils
 from src.auth.database import get_auth_db
 
 router = APIRouter(prefix="/auth", tags=["auth"])

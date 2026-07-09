@@ -1,6 +1,5 @@
 import httpx
 import time
-import os
 
 API_URL = "http://localhost:8000"
 
@@ -34,11 +33,11 @@ def test_multi_tenancy():
     # Register two tenants
     try:
         register("admin@tenanta.com", "password123", "Tenant A")
-    except Exception as e:
+    except Exception:
         pass
     try:
         register("admin@tenantb.com", "password123", "Tenant B")
-    except Exception as e:
+    except Exception:
         pass
 
     # Login

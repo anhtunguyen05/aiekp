@@ -14,7 +14,7 @@ from reasoning_engine.adapters.context_fetcher import ContextEngineHttpAdapter
 from reasoning_engine.adapters.llm_generator import LangChainLLMAdapter
 from reasoning_engine.services.reasoning_service import ReasoningService
 from src.config import settings
-from fastapi import Security, HTTPException, status, Depends
+from fastapi import HTTPException, status, Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 from sqlalchemy.orm import Session
@@ -118,7 +118,7 @@ def get_ingestor() -> GraphIngestor:
     return _ingestor
 
 
-from fastapi import Request
+
 
 # --- Context Engine Dependencies ---
 
