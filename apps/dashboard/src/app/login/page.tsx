@@ -27,7 +27,7 @@ export default function LoginPage() {
       if (result.access_token) {
         dispatch(setCredentials({
           token: result.access_token,
-          tenant_id: result.tenant_id,
+          tenant_id: result.tenant_id || '',
           role: result.role || 'member'
         }));
         
