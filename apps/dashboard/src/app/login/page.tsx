@@ -33,8 +33,8 @@ export default function LoginPage() {
         
         router.push('/');
       }
-    } catch (err: any) {
-      setError(err?.data?.detail || 'Lỗi đăng nhập. Vui lòng kiểm tra lại tài khoản.');
+    } catch (err: unknown) {
+      setError((err as { data?: { detail?: string } })?.data?.detail || 'Lỗi đăng nhập. Vui lòng kiểm tra lại tài khoản.');
     }
   };
 

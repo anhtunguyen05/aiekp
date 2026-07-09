@@ -11,13 +11,26 @@ interface EdgesResponse {
   edges: ApiEdge[];
 }
 
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+  role?: string;
+  tenant_id?: string;
+}
+
 export const aiekpApi = createApi({
   reducerPath: 'aiekpApi',
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
     prepareHeaders: (headers, { getState }) => {
       // Access auth token from Redux state
-      const token = (getState() as any).auth?.token;
+      const state = getState() as { auth?: { token: string | null } };
+      const token = state.auth?.token;
       
       if (token) {
         headers.set('Authorization', `Bearer ${token}`);
@@ -27,7 +40,7 @@ export const aiekpApi = createApi({
   }),
   tagTypes: ['Graph', 'Stats'],
   endpoints: (builder) => ({
-    login: builder.mutation<any, any>({
+    login: builder.mutation<LoginResponse, LoginRequest>({
       query: (credentials) => {
         // We use application/x-www-form-urlencoded because OAuth2PasswordRequestForm expects form data
         const formData = new URLSearchParams();
