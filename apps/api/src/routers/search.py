@@ -1,6 +1,11 @@
 from fastapi import APIRouter, Depends
 from knowledge_graph import QdrantVectorManager, LocalSentenceTransformerEmbedder
-from src.dependencies import get_qdrant_manager, get_embedder
+from src.dependencies import (
+    get_qdrant_manager,
+    get_embedder,
+    get_current_user,
+    CurrentUser,
+)
 from src.schemas import SearchRequest, SearchResponse, SearchResultItem
 
 router = APIRouter(prefix="/search", tags=["search"])
@@ -9,6 +14,7 @@ router = APIRouter(prefix="/search", tags=["search"])
 @router.post("/", response_model=SearchResponse)
 async def semantic_search(
     request: SearchRequest,
+    current_user: CurrentUser = Depends(get_current_user),
     vector_manager: QdrantVectorManager = Depends(get_qdrant_manager),
     embedder: LocalSentenceTransformerEmbedder = Depends(get_embedder),
 ):
@@ -17,7 +23,10 @@ async def semantic_search(
 
     # 2. Search in Qdrant
     results = vector_manager.search(
-        collection_name="code_nodes", query_vector=query_vector, limit=request.top_k
+        collection_name="code_nodes",
+        query_vector=query_vector,
+        tenant_id=current_user.tenant_id,
+        limit=request.top_k,
     )
 
     # 3. Format results

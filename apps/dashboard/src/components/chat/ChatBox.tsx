@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { EvidencePanel } from './EvidencePanel';
 import { AffectedNode } from '@/lib/api-types'; // Reuse type for sources
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 interface ChatMessage {
   id: string;
@@ -25,6 +27,7 @@ export function ChatBox() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const token = useSelector((state: RootState) => state.auth.token);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -41,7 +44,10 @@ export function ChatBox() {
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/feedback/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ trace_id: traceId, score })
       });
     } catch (error) {
@@ -71,7 +77,10 @@ export function ChatBox() {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/reason/stream`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ query: text, session_id: 'default' }),
       });
 

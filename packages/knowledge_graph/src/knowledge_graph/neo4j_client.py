@@ -19,32 +19,43 @@ class Neo4jGraphManager:
         with self.driver.session() as session:
             return session.run(query, parameters).data()
 
-    def clear_database(self):
+    def clear_database(self, tenant_id: str = None):
         """
-        Deletes all nodes and relationships in the database.
+        Deletes nodes and relationships for a specific tenant, or all if tenant_id is None.
         """
-        self._execute_query("MATCH (n) DETACH DELETE n")
+        if tenant_id:
+            self._execute_query(
+                "MATCH (n {tenant_id: $tenant_id}) DETACH DELETE n",
+                {"tenant_id": tenant_id},
+            )
+        else:
+            self._execute_query("MATCH (n) DETACH DELETE n")
 
-    def ingest_file_metadata(self, metadata: FileMetadata):
+    def ingest_file_metadata(self, metadata: FileMetadata, tenant_id: str):
         """
-        Upserts the file metadata, including its classes and functions, into Neo4j.
+        Upserts the file metadata, including its classes and functions, into Neo4j with tenant_id.
         """
         # 1. Merge File Node
         file_query = """
-        MERGE (f:File {path: $file_path})
+        MERGE (f:File {path: $file_path, tenant_id: $tenant_id})
         SET f.language = $language
         RETURN f
         """
         self._execute_query(
-            file_query, {"file_path": metadata.file_path, "language": metadata.language}
+            file_query,
+            {
+                "file_path": metadata.file_path,
+                "language": metadata.language,
+                "tenant_id": tenant_id,
+            },
         )
 
         # 2. Merge Standalone Functions and link to File
         for func in metadata.standalone_functions:
             func_id = f"{metadata.file_path}::{func.name}"
             func_query = """
-            MATCH (f:File {path: $file_path})
-            MERGE (func:Function {id: $func_id})
+            MATCH (f:File {path: $file_path, tenant_id: $tenant_id})
+            MERGE (func:Function {id: $func_id, tenant_id: $tenant_id})
             SET func.name = $name,
                 func.docstring = $docstring,
                 func.parameters = $parameters,
@@ -60,6 +71,7 @@ class Neo4jGraphManager:
                     "docstring": func.docstring,
                     "parameters": func.parameters,
                     "return_type": func.return_type,
+                    "tenant_id": tenant_id,
                 },
             )
 
@@ -67,8 +79,8 @@ class Neo4jGraphManager:
         for cls in metadata.classes:
             cls_id = f"{metadata.file_path}::{cls.name}"
             cls_query = """
-            MATCH (f:File {path: $file_path})
-            MERGE (c:Class {id: $cls_id})
+            MATCH (f:File {path: $file_path, tenant_id: $tenant_id})
+            MERGE (c:Class {id: $cls_id, tenant_id: $tenant_id})
             SET c.name = $name,
                 c.docstring = $docstring
             MERGE (f)-[:DEFINES]->(c)
@@ -80,6 +92,7 @@ class Neo4jGraphManager:
                     "cls_id": cls_id,
                     "name": cls.name,
                     "docstring": cls.docstring,
+                    "tenant_id": tenant_id,
                 },
             )
 
@@ -87,8 +100,8 @@ class Neo4jGraphManager:
             for method in cls.methods:
                 method_id = f"{cls_id}::{method.name}"
                 method_query = """
-                MATCH (c:Class {id: $cls_id})
-                MERGE (m:Function {id: $method_id})
+                MATCH (c:Class {id: $cls_id, tenant_id: $tenant_id})
+                MERGE (m:Function {id: $method_id, tenant_id: $tenant_id})
                 SET m.name = $name,
                     m.docstring = $docstring,
                     m.parameters = $parameters,
@@ -105,5 +118,6 @@ class Neo4jGraphManager:
                         "docstring": method.docstring,
                         "parameters": method.parameters,
                         "return_type": method.return_type,
+                        "tenant_id": tenant_id,
                     },
                 )

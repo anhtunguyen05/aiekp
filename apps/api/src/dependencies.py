@@ -14,22 +14,46 @@ from reasoning_engine.adapters.context_fetcher import ContextEngineHttpAdapter
 from reasoning_engine.adapters.llm_generator import LangChainLLMAdapter
 from reasoning_engine.services.reasoning_service import ReasoningService
 from src.config import settings
-from fastapi import Security, HTTPException, status
-from fastapi.security import APIKeyHeader
+from fastapi import HTTPException, status, Depends, Request
+from fastapi.security import OAuth2PasswordBearer
+import jwt
+from sqlalchemy.orm import Session
+from src.auth.database import get_auth_db
+from src.auth import models, utils
 
-api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
-def verify_api_key(api_key: str = Security(api_key_header)) -> str | None:
-    """Verify API Key if it is configured in settings."""
-    if not settings.api_key:
-        return None  # Authentication is disabled
-    if api_key == settings.api_key:
-        return api_key
-    raise HTTPException(
+class CurrentUser:
+    def __init__(self, email: str, tenant_id: str, role: str):
+        self.email = email
+        self.tenant_id = tenant_id
+        self.role = role
+
+
+def get_current_user(
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_auth_db)
+) -> CurrentUser:
+    credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid or missing API Key",
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
     )
+    try:
+        payload = jwt.decode(token, utils.SECRET_KEY, algorithms=[utils.ALGORITHM])
+        email: str = payload.get("sub")
+        tenant_id: str = payload.get("tenant_id")
+        role: str = payload.get("role")
+        if email is None or tenant_id is None:
+            raise credentials_exception
+    except jwt.PyJWTError:
+        raise credentials_exception
+
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if user is None:
+        raise credentials_exception
+
+    return CurrentUser(email=user.email, tenant_id=tenant_id, role=role)
 
 
 # Global instances that will be managed by lifespan
@@ -101,9 +125,16 @@ def get_ingestor() -> GraphIngestor:
 # --- Context Engine Dependencies ---
 
 
-def get_context_service() -> IContextService:
+def get_context_service(request: Request) -> IContextService:
+    token = None
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ")[1]
+
     intent_adapter = KeywordIntentAdapter()
-    knowledge_client = HttpKnowledgeEngineAdapter(base_url="http://localhost:8000")
+    knowledge_client = HttpKnowledgeEngineAdapter(
+        base_url="http://localhost:8000", token=token
+    )
     return ContextService(
         intent_analyzer=intent_adapter, knowledge_client=knowledge_client
     )
@@ -112,8 +143,15 @@ def get_context_service() -> IContextService:
 # --- Reasoning Engine Dependencies ---
 
 
-def get_reasoning_service() -> IReasoningService:
-    context_fetcher = ContextEngineHttpAdapter(base_url="http://localhost:8000")
+def get_reasoning_service(request: Request) -> IReasoningService:
+    token = None
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.split(" ")[1]
+
+    context_fetcher = ContextEngineHttpAdapter(
+        base_url="http://localhost:8000", token=token
+    )
     llm_generator = LangChainLLMAdapter(model_name="gemini-3.5-flash", temperature=0.0)
     return ReasoningService(
         context_fetcher=context_fetcher, llm_generator=llm_generator

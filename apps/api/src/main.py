@@ -23,7 +23,7 @@ if global_config_file.exists():
 from fastapi import FastAPI, Depends  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from strawberry.fastapi import GraphQLRouter  # noqa: E402
-from src.dependencies import init_dependencies, close_dependencies, verify_api_key  # noqa: E402
+from src.dependencies import init_dependencies, close_dependencies, get_current_user  # noqa: E402
 from src.routers import (
     health,
     scanner,
@@ -36,6 +36,7 @@ from src.routers import (
     rules,
     docs,
     feedback,
+    auth,
 )  # noqa: E402
 from src.config import settings  # noqa: E402
 from src.graphql_api.schema import schema  # noqa: E402
@@ -45,8 +46,10 @@ from src.graphql_api.schema import schema  # noqa: E402
 async def lifespan(app: FastAPI):
     # Initialize Neo4j, Qdrant, etc.
     from src.telemetry.database import init_db
+    from src.auth.database import init_auth_db
 
     init_db()
+    init_auth_db()
     await init_dependencies()
     yield
     # Cleanup connections
@@ -69,9 +72,10 @@ app.add_middleware(
 )
 
 app.include_router(health.router)  # Healthcheck doesn't need API Key
+app.include_router(auth.router)
 
 # Protected routers
-protected_dependencies = [Depends(verify_api_key)]
+protected_dependencies = [Depends(get_current_user)]
 app.include_router(scanner.router, dependencies=protected_dependencies)
 app.include_router(ingest.router, dependencies=protected_dependencies)
 app.include_router(search.router, dependencies=protected_dependencies)

@@ -108,7 +108,7 @@ This document provides a high-level summary of all phases of the AI Engineering 
 
 ### Phase 16: Security, Auth & Multi-Tenancy (RBAC)
 *   **Summary**: Implement access control (OAuth2, JWT) and Node-level RBAC for multi-team environments to ensure code privacy and secure multi-tenant deployments.
-*   **Status**: Planned 🔮
+*   **Status**: Active 🚧
 
 ### Phase 17: Public Release (Marketplace & PyPI)
 *   **Summary**: Publish the VSCode Extension to the Microsoft Marketplace and the CLI tool to PyPI for global distribution. Create comprehensive onboarding documentation for end-users (Docker requirements, setup guides).

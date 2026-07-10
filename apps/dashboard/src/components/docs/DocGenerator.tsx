@@ -5,6 +5,8 @@ import { FileText, Download, Copy, Play, CheckCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { DocType } from '@/lib/api-types';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 const DOC_TYPES: { type: DocType; label: string; description: string }[] = [
   {
@@ -36,6 +38,7 @@ export function DocGenerator() {
   const [generatedDoc, setGeneratedDoc] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const token = useSelector((state: RootState) => state.auth.token);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
@@ -46,7 +49,10 @@ export function DocGenerator() {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/docs/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ doc_type: selectedType, session_id: 'doc-gen' }),
       });
 

@@ -22,12 +22,12 @@ class GraphIngestor:
         # Ensure collection exists
         self.qdrant.ensure_collection("code_nodes", self.embedder.vector_size)
 
-    def ingest(self, metadata: FileMetadata):
+    def ingest(self, metadata: FileMetadata, tenant_id: str):
         """
         Synchronously ingest the metadata into Graph and Vector DBs.
         """
         # 1. Ingest relational data into Neo4j
-        self.neo4j.ingest_file_metadata(metadata)
+        self.neo4j.ingest_file_metadata(metadata, tenant_id)
 
         # 2. Extract texts to embed for Qdrant
         # We will embed functions and classes (especially their docstrings) for semantic search.
@@ -91,5 +91,8 @@ class GraphIngestor:
 
             # 4. Upsert to Qdrant
             self.qdrant.upsert_vectors(
-                collection_name="code_nodes", vectors=vectors, payloads=payloads
+                collection_name="code_nodes",
+                vectors=vectors,
+                payloads=payloads,
+                tenant_id=tenant_id,
             )

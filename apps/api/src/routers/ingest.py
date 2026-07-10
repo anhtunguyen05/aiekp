@@ -4,7 +4,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from fastapi.responses import StreamingResponse
 import os
 from knowledge_graph import GraphIngestor
-from src.dependencies import get_ingestor
+from src.dependencies import get_ingestor, get_current_user, CurrentUser
 from src.schemas import IngestRequest, IngestResponse
 
 router = APIRouter(prefix="/ingest", tags=["ingest"])
@@ -34,7 +34,7 @@ def save_status(status_dict):
 scan_status = load_status()
 
 
-def process_repository(repo_path: str, ingestor: GraphIngestor):
+def process_repository(repo_path: str, ingestor: GraphIngestor, tenant_id: str):
     # This simulates a background job for parsing and ingesting the repo
     # using our RepositoryScanner and GraphIngestor.
     # Note: Scanner currently relies on prisma which requires async,
@@ -105,7 +105,7 @@ def process_repository(repo_path: str, ingestor: GraphIngestor):
             extract_result = extractor.extract(parse_result, file_path)
 
             # Ingest
-            ingestor.ingest(extract_result)
+            ingestor.ingest(extract_result, tenant_id)
             print(f"Successfully ingested {file_path}")
         except Exception as e:
             print(f"Error processing {file_path}: {e}")
@@ -129,6 +129,7 @@ def process_repository(repo_path: str, ingestor: GraphIngestor):
 async def trigger_ingestion(
     request: IngestRequest,
     background_tasks: BackgroundTasks,
+    current_user: CurrentUser = Depends(get_current_user),
     ingestor: GraphIngestor = Depends(get_ingestor),
 ):
     repo_path = os.path.abspath(request.repo_path)
@@ -146,7 +147,9 @@ async def trigger_ingestion(
     }
     save_status(scan_status)
 
-    background_tasks.add_task(process_repository, repo_path, ingestor)
+    background_tasks.add_task(
+        process_repository, repo_path, ingestor, current_user.tenant_id
+    )
     return IngestResponse(
         status="accepted",
         message=f"Ingestion started for {repo_path} in the background.",

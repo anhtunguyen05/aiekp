@@ -3,11 +3,14 @@
 import { useState } from "react";
 import { FolderGit2, Search, Play } from "lucide-react";
 import { RepositoryProgress } from "@/components/repositories/RepositoryProgress";
+import { useSelector } from 'react-redux';
+import { RootState } from '@/store';
 
 export default function RepositoriesPage() {
   const [repoPath, setRepoPath] = useState("");
   const [activeScan, setActiveScan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const token = useSelector((state: RootState) => state.auth.token);
 
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +20,10 @@ export default function RepositoriesPage() {
     try {
       const res = await fetch("http://localhost:8000/ingest/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ repo_path: repoPath.trim() }),
       });
 
