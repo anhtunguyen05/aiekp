@@ -57,17 +57,40 @@ uv run --directory apps/cli aiekp server start
 
 *The server will be available at `http://127.0.0.1:8000`.*
 
-### 5. Install the VSCode Extension
+### 5. Authentication & Login
 
-For the best experience, install the VSCode extension. 
+AIEKP now requires authentication. Before scanning repositories or using the VSCode extension, you must register and log in:
 
-1. Locate the packaged VSIX file at `apps/vscode-extension/aiekp-1.0.0.vsix`.
+```bash
+# Register a new account
+aiekp auth register admin@aiekp.local password123 "My Organization"
+
+# Log in
+aiekp auth login admin@aiekp.local password123
+```
+*Your JWT token will be saved to `~/.aiekp/auth.json` and printed to the console.*
+
+### 6. Install the VSCode Extension
+
+For the best experience, install the VSCode extension from the Microsoft Marketplace or install it locally:
+
+1. Locate the packaged VSIX file at `apps/vscode-extension/aiekp-1.0.1.vsix` or download it from the Marketplace.
 2. Open VSCode and go to the **Extensions** view (`Ctrl+Shift+X`).
 3. Click the `...` menu in the top right and select **Install from VSIX...**.
-4. Choose `aiekp-1.0.0.vsix`.
-5. Open the AIEKP Chat panel from the activity bar!
+4. Choose `aiekp-1.0.1.vsix`.
+5. Open VSCode Settings (`Ctrl+,`), search for `aiekp.token`, and paste your JWT token.
+6. Open the AIEKP Chat panel from the activity bar!
 
-### 6. Evaluation & Fine-Tuning (Phase 15+)
+### 7. Web Dashboard (Phase 13+)
+
+You can also interact with AIEKP via the Web Dashboard:
+```bash
+cd apps/dashboard
+npm run dev
+```
+Navigate to `http://localhost:3000` and log in with your credentials.
+
+### 8. Evaluation & Fine-Tuning (Phase 15+)
 
 AIEKP tracks all reasoning traces and user feedback (Thumbs Up/Down) into a local `telemetry.db` SQLite database. You can evaluate the RAG pipeline's performance using Ragas or export the data for fine-tuning your own models.
 
@@ -90,4 +113,4 @@ This monorepo contains:
 - `plugins/python_parser/`: Extracts AST nodes and relationships from Python code.
 
 ---
-*Built for the Phase 10.5 Release.*
+*Built for the Phase 17 Release.*

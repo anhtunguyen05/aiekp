@@ -12,10 +12,10 @@ export class ApiClient {
     ) {
         const config = vscode.workspace.getConfiguration('aiekp');
         const apiUrl = config.get<string>('apiUrl', 'http://127.0.0.1:8000');
-        const apiKey = config.get<string>('apiKey', '');
+        const token = config.get<string>('token', '');
 
-        if (!apiKey) {
-            onError('API Key is missing. Please configure aiekp.apiKey in settings.');
+        if (!token) {
+            onError('JWT Token is missing. Please configure aiekp.token in settings.');
             onDone();
             return;
         }
@@ -31,7 +31,7 @@ export class ApiClient {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-API-Key': apiKey,
+                'Authorization': `Bearer ${token}`,
                 'Content-Length': Buffer.byteLength(payload)
             }
         };
@@ -39,6 +39,12 @@ export class ApiClient {
         const client = parsedUrl.protocol === 'https:' ? https : http;
 
         const req = client.request(parsedUrl, options, (res) => {
+            if (res.statusCode === 401) {
+                onError('401 Unauthorized. Your token may be invalid or expired. Please update aiekp.token in settings.');
+                onDone();
+                return;
+            }
+
             if (res.statusCode !== 200) {
                 onError(`Server returned status code ${res.statusCode}`);
                 onDone();
