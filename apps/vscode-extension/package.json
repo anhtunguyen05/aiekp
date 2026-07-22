@@ -2,7 +2,7 @@
   "name": "aiekp",
   "displayName": "AIEKP Reasoning Assistant",
   "description": "Integrates AIEKP Reasoning Engine into VSCode",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "anhtunguyen05",
   "engines": {
     "vscode": "^1.90.0"
@@ -34,10 +34,10 @@
           "default": "http://127.0.0.1:8000",
           "description": "URL of the AIEKP backend API."
         },
-        "aiekp.apiKey": {
+        "aiekp.token": {
           "type": "string",
           "default": "",
-          "description": "API Key for AIEKP backend authentication."
+          "description": "JWT Token for AIEKP backend authentication. Generate this via the CLI or Dashboard."
         }
       }
     }

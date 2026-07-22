@@ -108,8 +108,9 @@ This document provides a high-level summary of all phases of the AI Engineering 
 
 ### Phase 16: Security, Auth & Multi-Tenancy (RBAC)
 *   **Summary**: Implement access control (OAuth2, JWT) and Node-level RBAC for multi-team environments to ensure code privacy and secure multi-tenant deployments.
-*   **Status**: Active 🚧
+*   **Status**: Completed ✅
 
-### Phase 17: Public Release (Marketplace & PyPI)
-*   **Summary**: Publish the VSCode Extension to the Microsoft Marketplace and the CLI tool to PyPI for global distribution. Create comprehensive onboarding documentation for end-users (Docker requirements, setup guides).
-*   **Status**: Planned 🔮
+### Phase 17: VSCode Release & Product Verification
+*   **Summary**: Perform end-to-end testing of the AIEKP platform (CLI, API, Dashboard, VSCode) after recent authentication changes. Package and publish the VSCode Extension to the Microsoft Marketplace. Update onboarding documentation for the public release. (Note: PyPI release is already completed).
+*   **Detailed Spec**: `tracks/phase-17-release/spec.md`
+*   **Status**: Completed ✅
