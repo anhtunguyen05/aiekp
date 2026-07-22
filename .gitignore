@@ -81,3 +81,11 @@ cover/
 .mypy_cache/
 .pyre/
 .typeguard/
+
+# -----------------------------------------------------------------------------
+# Local Databases and Runtime Artifacts
+# -----------------------------------------------------------------------------
+*.db
+*.sqlite
+*.sqlite3
+scan_status.json
